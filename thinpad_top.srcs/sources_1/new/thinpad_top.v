@@ -4,14 +4,14 @@ module thinpad_top(
     input wire clk_50M,           //50MHz 时钟输入
     input wire clk_11M0592,       //11.0592MHz 时钟输入
 
-    input wire clock_btn,         //手动时钟按钮开关，按下时为1
-    input wire reset_btn,         //手动复位按钮开关，按下时为1
+    input wire clock_btn,         //BTN5手动时钟按钮开关，带消抖电路，按下时为1
+    input wire reset_btn,         //BTN6手动复位按钮开关，带消抖电路，按下时为1
 
-    input  wire[3:0]  touch_btn,  //4位微动按钮开关，按下时为1
+    input  wire[3:0]  touch_btn,  //BTN1~BTN4，按钮开关，按下时为1
     input  wire[31:0] dip_sw,     //32位拨码开关，拨到“ON”时为1
-    output wire[15:0] leds,       //16位LED，输出1点亮
-    output wire[7:0]  dpy0,       //数码管0信号，包括小数点，输出1点亮
-    output wire[7:0]  dpy1,       //数码管1信号，包括小数点，输出1点亮
+    output wire[15:0] leds,       //16位LED，输出时1点亮
+    output wire[7:0]  dpy0,       //数码管低位信号，包括小数点，输出1点亮
+    output wire[7:0]  dpy1,       //数码管高位信号，包括小数点，输出1点亮
 
     //CPLD串口控制器信号
     output wire uart_rdn,         //读串口信号，低有效
