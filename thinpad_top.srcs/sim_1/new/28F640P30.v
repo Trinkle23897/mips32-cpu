@@ -1486,22 +1486,33 @@ module MemoryModule(Info);
 input Info;
 reg [`WORD_range] memory [0:(`MEMORY_dim) - 1];     // the Memory: word organization
 
+parameter FILENAME_MEM="";
+
 initial begin 
         LoadMemory;
 end 
 
   task LoadMemory;                                // Initialize and load the memory from a file
   integer i;     
+  integer fd, init_size;     
     begin
       #0 if (Info) $display("[%t] Inizialize the Memory to default value",$time);
      
       for (i = 0; i < `MEMORY_dim; i = i + 1)  memory[i] = {16{`HIGH}};    // Memory Init
       
-      if (`FILENAME_mem !== "") begin 
-           $readmemb(`FILENAME_mem, memory);
-
-          if (Info) $display("[%t] Load Memory from file: %s",$time, `FILENAME_mem);
-          else if (Info) $display("[%t] Warning: File: %s not found",$time, `FILENAME_mem);
+      if (FILENAME_MEM !== "") begin
+          // $readmemb(FILENAME_MEM, memory);
+          fd = $fopen(FILENAME_MEM ,"rb");
+          if(fd)begin
+            if (Info) $display("[%t] Load Memory from file: %s",$time, FILENAME_MEM);
+            init_size = $fread(memory, fd) / 2;
+            $fclose(fd);
+            for (i = 0; i < init_size; i = i + 1)
+              memory[i] = {memory[i][0+:8],memory[i][8+:8]};
+          end
+          else begin
+            if (Info) $display("[%t] Warning: File: %s not found",$time, FILENAME_MEM);
+          end
       end
     end
   endtask
@@ -2523,7 +2534,7 @@ endmodule // end module Kernel
 
 
 module x28fxxxp30(A, DQ, W_N, G_N, E_N, L_N, K, WAIT, WP_N, RP_N, VDD, VDDQ, VPP, Info);
-
+  parameter FILENAME_MEM = "";
   // Signal Bus
   input [`ADDRBUS_dim-1:0] A;           // Address Bus 
   inout [`DATABUS_dim-1:0] DQ;          // Data I/0 Bus
@@ -2690,7 +2701,7 @@ always @(negedge WE_N) begin
  ReadModule              Read_man          (DataBusIn, AddrBusIn, Kernel.ioVoltOK, Info);
  OutputBufferModule      OutputBuffer_man  (DataBusIn, DataBurst, DQ, OE_N);
  StatusRegModule         SR_man            (Info);
- MemoryModule            Memory_man        (Info);
+ MemoryModule  #(.FILENAME_MEM(FILENAME_MEM))          Memory_man        (Info);
  ProgramModule           Program_man       (AddrBusIn, DQ_delayed, Kernel.progVoltOK, Kernel.progHighVoltOK, Info);
 
 BuffEnhancedFactProgramModule BuffEnhancedFactProgram_man(AddrBusIn, DQ_delayed, Kernel.progVoltOK, Kernel.progHighVoltOK, Info);
