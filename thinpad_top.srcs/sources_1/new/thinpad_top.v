@@ -52,7 +52,7 @@ module thinpad_top(
 
     //USB 控制器信号，参考 SL811 芯片手册
     output wire sl811_a0,
-    inout  wire[7:0] sl811_d,
+    //inout  wire[7:0] sl811_d,
     output wire sl811_wr_n,
     output wire sl811_rd_n,
     output wire sl811_cs_n,
