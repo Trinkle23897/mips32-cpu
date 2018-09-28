@@ -1,5 +1,5 @@
 update_compile_order -fileset sources_1
-upgrade_ip [get_ips]
+#upgrade_ip [get_ips]
 
 reset_run impl_1
 reset_run synth_1
