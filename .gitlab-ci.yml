@@ -1,6 +1,7 @@
 
 stages:
   - build
+  - test
 
 bitstream:
   stage: build
@@ -11,3 +12,13 @@ bitstream:
   artifacts:
     paths:
       - thinpad_top.runs/impl_1/thinpad_top.bit
+
+test_on_cloud:
+  stage: test
+  before_script:
+    - git submodule sync --recursive
+    - git submodule update --init --recursive
+    - pip3 install --user -r Thinpad-Cloud-SDK/requirements.txt
+  script:
+    - cd Thinpad-Cloud-SDK
+    - ./example.py "$THINPAD_CLOUD_USER" "$THINPAD_CLOUD_PASSWD" ../thinpad_top.runs/impl_1/thinpad_top.bit
