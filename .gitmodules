@@ -1,0 +1,3 @@
+[submodule "Thinpad-Cloud-SDK"]
+	path = Thinpad-Cloud-SDK
+	url = https://gitlab.secoder.net/2017210832/Thinpad-Cloud-SDK.git
