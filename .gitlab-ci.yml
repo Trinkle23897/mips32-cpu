@@ -18,7 +18,7 @@ test_on_cloud:
   before_script:
     - git submodule sync --recursive
     - git submodule update --init --recursive
-    - pip3 install --user -r Thinpad-Cloud-SDK/requirements.txt
+    - pushd Thinpad-Cloud-SDK && pip3 install --user -r requirements.txt && ./setup.py install --user && popd
   script:
     - cd Thinpad-Cloud-SDK
     - ./example.py "$THINPAD_CLOUD_USER" "$THINPAD_CLOUD_PASSWD" ../thinpad_top.runs/impl_1/thinpad_top.bit
