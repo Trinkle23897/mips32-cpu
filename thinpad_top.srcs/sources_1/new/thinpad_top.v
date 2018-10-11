@@ -83,6 +83,36 @@ module thinpad_top(
 
 /* =========== Demo code begin =========== */
 
+// PLL分频示例
+wire locked, clk_10M, clk_20M;
+pll_example clock_gen 
+ (
+  // Clock out ports
+  .clk_out1(clk_10M), // 时钟输出1，频率在IP配置界面中设置
+  .clk_out2(clk_20M), // 时钟输出2，频率在IP配置界面中设置
+  // Status and control signals
+  .reset(reset_btn), // PLL复位输入
+  .locked(locked), // 锁定输出，"1"表示时钟稳定，可作为后级电路复位
+ // Clock in ports
+  .clk_in1(clk_50M) // 外部时钟输入
+ );
+
+reg reset_of_clk10M;
+// 异步复位，同步释放
+always@(posedge clk_10M or negedge locked) begin
+    if(~locked) reset_of_clk10M <= 1'b1;
+    else        reset_of_clk10M <= 1'b0;
+end
+
+always@(posedge clk_10M or posedge reset_of_clk10M) begin
+    if(reset_of_clk10M)begin
+        // Your Code
+    end
+    else begin
+        // Your Code
+    end
+end
+
 // 数码管连接关系示意图，dpy1同理
 // p=dpy0[0] // ---a---
 // c=dpy0[1] // |     |
