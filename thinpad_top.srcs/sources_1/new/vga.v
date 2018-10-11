@@ -15,7 +15,7 @@
 module vga
 #(parameter WIDTH = 0, HSIZE = 0, HFP = 0, HSP = 0, HMAX = 0, VSIZE = 0, VFP = 0, VSP = 0, VMAX = 0, HSPP = 0, VSPP = 0)
 (
-    input clk,
+    input wire clk,
     output wire hsync,
     output wire vsync,
     output reg [WIDTH - 1:0] hdata,
