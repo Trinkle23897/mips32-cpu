@@ -3,9 +3,9 @@ Thinpad 模板工程
 
 工程包含示例代码和所有引脚约束，可以直接编译。
 
-代码中包含中文注释，编码为utf-8，在Windows版Vivado下可能出现乱码问题。  
-请用别的代码编辑器打开文件，并将编码改为GBK。
+代码中包含中文注释，编码为utf-8，在Windows版Vivado下可能出现乱码问题。
 
+请统一使用utf-8编码
 
 
 # First Mile Stone (Fri. Week7)
@@ -33,6 +33,8 @@ Basic CPU Implementation
 其他的地方如果不明白的话可以对照着祖传代码看一下（
 
 在写完指令之后请确认用书中给的testcase能够跑过。（已确认在大端存储下能够通过chap. 4-9的书中所有仿真）
+
+Upd: 已确认在小端能够通过仿真，ll/sc那一类
 
 ### simulation
 
