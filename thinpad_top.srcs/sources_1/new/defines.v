@@ -24,7 +24,7 @@
 `define False_v 1'b0
 `define ChipEnable 1'b1
 `define ChipDisable 1'b0
-
+`define StartInstAddr 32'h80000000
 
 // Instruction Number
 `define EXE_AND  6'b100100
@@ -207,7 +207,7 @@
 // inst_rom (no need for thinpad_top.v?)
 `define InstAddrBus 31:0
 `define InstBus 31:0
-`define InstMemNum 131071
+`define InstMemNum 33554432
 `define InstMemNumLog2 17
 
 // data_ram (no need too?)
