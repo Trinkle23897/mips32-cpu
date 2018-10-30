@@ -1,3 +1,6 @@
 [submodule "Thinpad-Cloud-SDK"]
 	path = Thinpad-Cloud-SDK
 	url = https://gitlab.secoder.net/2017210832/Thinpad-Cloud-SDK.git
+[submodule "cpu_testcase"]
+	path = cpu_testcase
+	url = https://github.com/z4yx/cpu-testcase.git
