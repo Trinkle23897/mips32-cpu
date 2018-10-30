@@ -175,9 +175,17 @@ module mem(
                 `EXE_LW_OP: begin
                     mem_addr_o <= mem_addr_i;
                     mem_we <= `WriteDisable;
-                    wdata_o <= mem_data_i;
-                    mem_sel_o <= 4'b1111;
                     mem_ce_o <= `ChipEnable;
+                    case(mem_addr_i[1:0])
+                        2'b00: begin
+                            wdata_o <= mem_data_i;
+                            mem_sel_o <= 4'b1111;
+                        end
+                        default: begin
+                            mem_sel_o <= 4'b0000;
+                            wdata_o <= `ZeroWord;
+                        end
+                    endcase
                 end
                 `EXE_LWL_OP: begin
                     mem_addr_o <= {mem_addr_i[31:2], 2'b00};
@@ -278,8 +286,15 @@ module mem(
                     mem_addr_o <= mem_addr_i;
                     mem_we <= `WriteEnable;
                     mem_data_o <= reg2_i;
-                    mem_sel_o <= 4'b1111;
                     mem_ce_o <= `ChipEnable;
+                    case (mem_addr_i[1:0])
+                        2'b00: begin
+                            mem_sel_o <= 4'b1111;
+                        end
+                        default: begin
+                            mem_sel_o <= 4'b0000;
+                        end
+                    endcase
                 end
                 `EXE_SWL_OP: begin
                     mem_addr_o <= {mem_addr_i[31:2], 2'b00};

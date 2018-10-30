@@ -12,14 +12,14 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="152000001fs"></ZoomEndTime>
-      <Cursor1Time time="1000000000fs"></Cursor1Time>
+      <ZoomEndTime time="8480000000001fs"></ZoomEndTime>
+      <Cursor1Time time="4100195000000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="175"></NameColumnWidth>
-      <ValueColumnWidth column_width="142"></ValueColumnWidth>
+      <NameColumnWidth column_width="135"></NameColumnWidth>
+      <ValueColumnWidth column_width="76"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="8" />
+   <WVObjectSize size="5" />
    <wvobject type="logic" fp_name="/openmips_min_sopc_tb/CLOCK_50">
       <obj_property name="ElementShortName">CLOCK_50</obj_property>
       <obj_property name="ObjectShortName">CLOCK_50</obj_property>
@@ -32,25 +32,12 @@
       <obj_property name="ElementShortName">if_inst[31:0]</obj_property>
       <obj_property name="ObjectShortName">if_inst[31:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/hi_i">
-      <obj_property name="ElementShortName">hi_i[31:0]</obj_property>
-      <obj_property name="ObjectShortName">hi_i[31:0]</obj_property>
+   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/regfile1/regs[4]">
+      <obj_property name="ElementShortName">[4][31:0]</obj_property>
+      <obj_property name="ObjectShortName">[4][31:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/lo_i">
-      <obj_property name="ElementShortName">lo_i[31:0]</obj_property>
-      <obj_property name="ObjectShortName">lo_i[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/hi_o">
-      <obj_property name="ElementShortName">hi_o[31:0]</obj_property>
-      <obj_property name="ObjectShortName">hi_o[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/lo_o">
-      <obj_property name="ElementShortName">lo_o[31:0]</obj_property>
-      <obj_property name="ObjectShortName">lo_o[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/regfile1/regs">
-      <obj_property name="ElementShortName">regs[0:31][31:0]</obj_property>
-      <obj_property name="ObjectShortName">regs[0:31][31:0]</obj_property>
-      <obj_property name="isExpanded"></obj_property>
+   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/regfile1/regs[19]">
+      <obj_property name="ElementShortName">[19][31:0]</obj_property>
+      <obj_property name="ObjectShortName">[19][31:0]</obj_property>
    </wvobject>
 </wave_config>
