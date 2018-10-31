@@ -79,49 +79,28 @@ module ex(
     assign reg2_o = reg2_i;
 
     always @ (*) begin
-        if(rst == `RstEnable) begin
+        if (rst == `RstEnable)
             logicout <= `ZeroWord;
-        end else begin
+        else
             case (aluop_i)
-                `EXE_OR_OP: begin
-                    logicout <= reg1_i | reg2_i;
-                end
-                `EXE_AND_OP: begin
-                    logicout <= reg1_i & reg2_i;
-                end
-                `EXE_NOR_OP: begin
-                    logicout <= ~(reg1_i |reg2_i);
-                end
-                `EXE_XOR_OP: begin
-                    logicout <= reg1_i ^ reg2_i;
-                end
-                default: begin
-                    logicout <= `ZeroWord;
-                end
+                `EXE_OR_OP: logicout <= reg1_i | reg2_i;
+                `EXE_AND_OP: logicout <= reg1_i & reg2_i;
+                `EXE_NOR_OP: logicout <= ~(reg1_i | reg2_i);
+                `EXE_XOR_OP: logicout <= reg1_i ^ reg2_i;
+                default: logicout <= `ZeroWord;
             endcase
-        end
     end
 
     always @ (*) begin
-        if(rst == `RstEnable) begin
+        if (rst == `RstEnable)
             shiftres <= `ZeroWord;
-        end else begin
+        else
             case (aluop_i)
-                `EXE_SLL_OP: begin
-                    shiftres <= reg2_i << reg1_i[4:0];
-                end
-                `EXE_SRL_OP: begin
-                    shiftres <= reg2_i >> reg1_i[4:0];
-                end
-                `EXE_SRA_OP: begin
-                    shiftres <= ({32{reg2_i[31]}} << (6'd32-{1'b0, reg1_i[4:0]}))
-                                | reg2_i >> reg1_i[4:0];
-                end
-                default: begin
-                    shiftres <= `ZeroWord;
-                end
+                `EXE_SLL_OP: shiftres <= reg2_i << reg1_i[4:0];
+                `EXE_SRL_OP: shiftres <= reg2_i >> reg1_i[4:0];
+                `EXE_SRA_OP: shiftres <= ({32{reg2_i[31]}} << (6'd32-{1'b0, reg1_i[4:0]})) | reg2_i >> reg1_i[4:0];
+                default: shiftres <= `ZeroWord;
             endcase
-        end
     end
 
     assign reg2_i_mux = ((aluop_i == `EXE_SUB_OP) || (aluop_i == `EXE_SUBU_OP) || (aluop_i == `EXE_SLT_OP))
@@ -137,20 +116,13 @@ module ex(
     assign reg1_i_not = ~reg1_i;
 
     always @ (*) begin
-        if(rst == `RstEnable) begin
+        if (rst == `RstEnable)
             arithmeticres <= `ZeroWord;
-        end else begin
+        else
             case (aluop_i)
-                `EXE_SLT_OP, `EXE_SLTU_OP: begin
-                    arithmeticres <= reg1_lt_reg2 ;
-                end
-                `EXE_ADD_OP, `EXE_ADDU_OP, `EXE_ADDI_OP, `EXE_ADDIU_OP: begin
-                    arithmeticres <= result_sum;
-                end
-                `EXE_SUB_OP, `EXE_SUBU_OP: begin
-                    arithmeticres <= result_sum;
-                end
-                `EXE_CLZ_OP: begin
+                `EXE_SLT_OP, `EXE_SLTU_OP: arithmeticres <= reg1_lt_reg2;
+                `EXE_ADD_OP, `EXE_ADDU_OP, `EXE_ADDI_OP, `EXE_ADDIU_OP, `EXE_SUB_OP, `EXE_SUBU_OP: arithmeticres <= result_sum;
+                `EXE_CLZ_OP:
                     arithmeticres <= reg1_i[31] ? 0 : reg1_i[30] ? 1 : reg1_i[29] ? 2 :
                                      reg1_i[28] ? 3 : reg1_i[27] ? 4 : reg1_i[26] ? 5 :
                                      reg1_i[25] ? 6 : reg1_i[24] ? 7 : reg1_i[23] ? 8 :
@@ -162,8 +134,7 @@ module ex(
                                      reg1_i[7] ? 24 : reg1_i[6] ? 25 : reg1_i[5] ? 26 :
                                      reg1_i[4] ? 27 : reg1_i[3] ? 28 : reg1_i[2] ? 29 :
                                      reg1_i[1] ? 30 : reg1_i[0] ? 31 : 32;
-                end
-                `EXE_CLO_OP: begin
+                `EXE_CLO_OP:
                     arithmeticres <= (reg1_i_not[31] ? 0 : reg1_i_not[30] ? 1 : reg1_i_not[29] ? 2 :
                                       reg1_i_not[28] ? 3 : reg1_i_not[27] ? 4 : reg1_i_not[26] ? 5 :
                                       reg1_i_not[25] ? 6 : reg1_i_not[24] ? 7 : reg1_i_not[23] ? 8 :
@@ -175,12 +146,8 @@ module ex(
                                       reg1_i_not[7] ? 24 : reg1_i_not[6] ? 25 : reg1_i_not[5] ? 26 :
                                       reg1_i_not[4] ? 27 : reg1_i_not[3] ? 28 : reg1_i_not[2] ? 29 :
                                       reg1_i_not[1] ? 30 : reg1_i_not[0] ? 31 : 32);
-                end
-                default: begin
-                    arithmeticres <= `ZeroWord;
-                end
+                default: arithmeticres <= `ZeroWord;
             endcase
-        end
     end
 
     assign opdata1_mult = (((aluop_i == `EXE_MUL_OP) || (aluop_i == `EXE_MULT_OP) ||
@@ -194,30 +161,21 @@ module ex(
     assign hilo_temp = opdata1_mult * opdata2_mult;
 
     always @ (*) begin
-        if(rst == `RstEnable) begin
-            mulres <= {`ZeroWord, `ZeroWord};
-        end else if ((aluop_i == `EXE_MULT_OP) || (aluop_i == `EXE_MUL_OP) ||
-                    (aluop_i == `EXE_MADD_OP) || (aluop_i == `EXE_MSUB_OP)) begin
-            if(reg1_i[31] ^ reg2_i[31] == 1'b1) begin
+        if (rst == `RstEnable) mulres <= {`ZeroWord, `ZeroWord};
+        else if ((aluop_i == `EXE_MULT_OP) || (aluop_i == `EXE_MUL_OP) ||
+                    (aluop_i == `EXE_MADD_OP) || (aluop_i == `EXE_MSUB_OP))
+            if (reg1_i[31] ^ reg2_i[31] == 1'b1)
                 mulres <= ~hilo_temp + 1;
-            end else begin
+            else
                 mulres <= hilo_temp;
-            end
-        end else begin
-            mulres <= hilo_temp;
-        end
+        else mulres <= hilo_temp;
     end
 
     always @ (*) begin
-        if(rst == `RstEnable) begin
-            {HI, LO} <= {`ZeroWord, `ZeroWord};
-        end else if(mem_whilo_i == `WriteEnable) begin
-            {HI, LO} <= {mem_hi_i, mem_lo_i};
-        end else if(wb_whilo_i == `WriteEnable) begin
-            {HI, LO} <= {wb_hi_i, wb_lo_i};
-        end else begin
-            {HI, LO} <= {hi_i, lo_i};
-        end
+        if (rst == `RstEnable) {HI, LO} <= {`ZeroWord, `ZeroWord};
+        else if (mem_whilo_i == `WriteEnable) {HI, LO} <= {mem_hi_i, mem_lo_i};
+        else if (wb_whilo_i == `WriteEnable) {HI, LO} <= {wb_hi_i, wb_lo_i};
+        else {HI, LO} <= {hi_i, lo_i};
     end
 
     always @ (*) begin
@@ -225,48 +183,45 @@ module ex(
     end
 
     always @ (*) begin
-        if(rst == `RstEnable) begin
+        if (rst == `RstEnable) begin
             hilo_temp_o <= {`ZeroWord, `ZeroWord};
             cnt_o <= 2'b00;
             stallreq_for_madd_msub <= `NoStop;
-        end else begin
+        end else
             case (aluop_i)
-                `EXE_MADD_OP, `EXE_MADDU_OP: begin
-                    if(cnt_i == 2'b00) begin
+                `EXE_MADD_OP, `EXE_MADDU_OP:
+                    if (cnt_i == 2'b00) begin
                         hilo_temp_o <= mulres;
                         cnt_o <= 2'b01;
                         stallreq_for_madd_msub <= `Stop;
                         hilo_temp1 <= {`ZeroWord, `ZeroWord};
-                    end else if(cnt_i == 2'b01) begin
+                    end else if (cnt_i == 2'b01) begin
                         hilo_temp_o <= {`ZeroWord, `ZeroWord};
                         cnt_o <= 2'b10;
                         hilo_temp1 <= hilo_temp_i + {HI, LO};
                         stallreq_for_madd_msub <= `NoStop;
                     end
-                end
-                `EXE_MSUB_OP, `EXE_MSUBU_OP: begin
-                    if(cnt_i == 2'b00) begin
+                `EXE_MSUB_OP, `EXE_MSUBU_OP:
+                    if (cnt_i == 2'b00) begin
                         hilo_temp_o <=  ~mulres + 1 ;
                         cnt_o <= 2'b01;
                         stallreq_for_madd_msub <= `Stop;
-                    end else if(cnt_i == 2'b01) begin
+                    end else if (cnt_i == 2'b01) begin
                         hilo_temp_o <= {`ZeroWord, `ZeroWord};
                         cnt_o <= 2'b10;
                         hilo_temp1 <= hilo_temp_i + {HI, LO};
                         stallreq_for_madd_msub <= `NoStop;
                     end
-                end
                 default: begin
                     hilo_temp_o <= {`ZeroWord, `ZeroWord};
                     cnt_o <= 2'b00;
                     stallreq_for_madd_msub <= `NoStop;
                 end
             endcase
-        end
     end
 
     always @ (*) begin
-        if(rst == `RstEnable) begin
+        if (rst == `RstEnable) begin
             stallreq_for_div <= `NoStop;
             div_opdata1_o <= `ZeroWord;
             div_opdata2_o <= `ZeroWord;
@@ -279,14 +234,14 @@ module ex(
             div_start_o <= `DivStop;
             signed_div_o <= 1'b0;
             case (aluop_i)
-                `EXE_DIV_OP: begin
-                    if(div_ready_i == `DivResultNotReady) begin
+                `EXE_DIV_OP:
+                    if (div_ready_i == `DivResultNotReady) begin
                         div_opdata1_o <= reg1_i;
                         div_opdata2_o <= reg2_i;
                         div_start_o <= `DivStart;
                         signed_div_o <= 1'b1;
                         stallreq_for_div <= `Stop;
-                    end else if(div_ready_i == `DivResultReady) begin
+                    end else if (div_ready_i == `DivResultReady) begin
                         div_opdata1_o <= reg1_i;
                         div_opdata2_o <= reg2_i;
                         div_start_o <= `DivStop;
@@ -299,15 +254,14 @@ module ex(
                         signed_div_o <= 1'b0;
                         stallreq_for_div <= `NoStop;
                     end
-                end
-                `EXE_DIVU_OP: begin
-                    if(div_ready_i == `DivResultNotReady) begin
+                `EXE_DIVU_OP:
+                    if (div_ready_i == `DivResultNotReady) begin
                         div_opdata1_o <= reg1_i;
                         div_opdata2_o <= reg2_i;
                         div_start_o <= `DivStart;
                         signed_div_o <= 1'b0;
                         stallreq_for_div <= `Stop;
-                    end else if(div_ready_i == `DivResultReady) begin
+                    end else if (div_ready_i == `DivResultReady) begin
                         div_opdata1_o <= reg1_i;
                         div_opdata2_o <= reg2_i;
                         div_start_o <= `DivStop;
@@ -320,103 +274,69 @@ module ex(
                         signed_div_o <= 1'b0;
                         stallreq_for_div <= `NoStop;
                     end
-                end
-                default: begin
-                end
+                default:;
             endcase
         end
     end
 
     always @ (*) begin
-        if(rst == `RstEnable) begin
+        if (rst == `RstEnable)
             moveres <= `ZeroWord;
-        end else begin
+        else begin
             moveres <= `ZeroWord;
             case (aluop_i)
-                `EXE_MFHI_OP: begin
-                    moveres <= HI;
-                end
-                `EXE_MFLO_OP: begin
-                    moveres <= LO;
-                end
-                `EXE_MOVZ_OP: begin
-                    moveres <= reg1_i;
-                end
-                `EXE_MOVN_OP: begin
-                    moveres <= reg1_i;
-                end
-                default : begin
-                end
+                `EXE_MFHI_OP: moveres <= HI;
+                `EXE_MFLO_OP: moveres <= LO;
+                `EXE_MOVZ_OP: moveres <= reg1_i;
+                `EXE_MOVN_OP: moveres <= reg1_i;
+                default:;
             endcase
         end
     end
 
     always @ (*) begin
         wd_o <= wd_i;
-        if(((aluop_i == `EXE_ADD_OP) || (aluop_i == `EXE_ADDI_OP) ||
-            (aluop_i == `EXE_SUB_OP)) && (ov_sum == 1'b1)) begin
+        if (((aluop_i == `EXE_ADD_OP) || (aluop_i == `EXE_ADDI_OP) ||
+            (aluop_i == `EXE_SUB_OP)) && (ov_sum == 1'b1))
             wreg_o <= `WriteDisable;
-        end else begin
+        else
             wreg_o <= wreg_i;
-        end
         case (alusel_i)
-            `EXE_RES_LOGIC: begin
-                wdata_o <= logicout;
-            end
-            `EXE_RES_SHIFT: begin
-                wdata_o <= shiftres;
-            end
-            `EXE_RES_MOVE: begin
-                wdata_o <= moveres;
-            end
-            `EXE_RES_ARITHMETIC: begin
-                wdata_o <= arithmeticres;
-            end
-            `EXE_RES_MUL: begin
-                wdata_o <= mulres[31:0];
-            end
-            `EXE_RES_JUMP_BRANCH: begin
-                wdata_o <= link_address_i;
-            end
-            default: begin
-                wdata_o <= `ZeroWord;
-            end
+            `EXE_RES_LOGIC: wdata_o <= logicout;
+            `EXE_RES_SHIFT: wdata_o <= shiftres;
+            `EXE_RES_MOVE: wdata_o <= moveres;
+            `EXE_RES_ARITHMETIC: wdata_o <= arithmeticres;
+            `EXE_RES_MUL: wdata_o <= mulres[31:0];
+            `EXE_RES_JUMP_BRANCH: wdata_o <= link_address_i;
+            default: wdata_o <= `ZeroWord;
         endcase
     end
 
     always @ (*) begin
-        if(rst == `RstEnable) begin
+        if (rst == `RstEnable) begin
             whilo_o <= `WriteDisable;
-            hi_o <= `ZeroWord;
-            lo_o <= `ZeroWord;
-        end else if((aluop_i == `EXE_MULT_OP) || (aluop_i == `EXE_MULTU_OP)) begin
+            {hi_o, lo_o} <= {`ZeroWord, `ZeroWord};
+        end else if ((aluop_i == `EXE_MULT_OP) || (aluop_i == `EXE_MULTU_OP)) begin
             whilo_o <= `WriteEnable;
-            hi_o <= mulres[63:32];
-            lo_o <= mulres[31:0];
-        end else if((aluop_i == `EXE_MADD_OP) || (aluop_i == `EXE_MADDU_OP)) begin
+            {hi_o, lo_o} <= mulres;
+        end else if ((aluop_i == `EXE_MADD_OP) || (aluop_i == `EXE_MADDU_OP)) begin
             whilo_o <= `WriteEnable;
-            hi_o <= hilo_temp1[63:32];
-            lo_o <= hilo_temp1[31:0];
-        end else if((aluop_i == `EXE_MSUB_OP) || (aluop_i == `EXE_MSUBU_OP)) begin
+            {hi_o, lo_o} <= hilo_temp1;
+        end else if ((aluop_i == `EXE_MSUB_OP) || (aluop_i == `EXE_MSUBU_OP)) begin
             whilo_o <= `WriteEnable;
-            hi_o <= hilo_temp1[63:32];
-            lo_o <= hilo_temp1[31:0];
-        end else if((aluop_i == `EXE_DIV_OP) || (aluop_i == `EXE_DIVU_OP)) begin
+            {hi_o, lo_o} <= hilo_temp1;
+        end else if ((aluop_i == `EXE_DIV_OP) || (aluop_i == `EXE_DIVU_OP)) begin
             whilo_o <= `WriteEnable;
-            hi_o <= div_result_i[63:32];
-            lo_o <= div_result_i[31:0];
-        end else if(aluop_i == `EXE_MTHI_OP) begin
+            {hi_o, lo_o} <= div_result_i;
+        end else if (aluop_i == `EXE_MTHI_OP) begin
             whilo_o <= `WriteEnable;
-            hi_o <= reg1_i;
-            lo_o <= LO;
-        end else if(aluop_i == `EXE_MTLO_OP) begin
+            {hi_o, lo_o} <= {reg1_i, LO};
+        end else if (aluop_i == `EXE_MTLO_OP) begin
             whilo_o <= `WriteEnable;
-            hi_o <= HI;
-            lo_o <= reg1_i;
+            {hi_o, lo_o} <= {HI, reg1_i};
         end else begin
             whilo_o <= `WriteDisable;
-            hi_o <= `ZeroWord;
-            lo_o <= `ZeroWord;
+            {hi_o, lo_o} <= {`ZeroWord, `ZeroWord};
         end
     end
 

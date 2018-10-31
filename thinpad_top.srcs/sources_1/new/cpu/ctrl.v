@@ -8,14 +8,9 @@ module ctrl(
 );
 
     always @ (*) begin
-        if ((rst == `RstEnable)) begin
-            stall <= 6'b000000;
-        end else if(stallreq_from_ex == `Stop) begin
-            stall <= 6'b001111;
-        end else if(stallreq_from_id == `Stop) begin
-            stall <= 6'b000111;
-        end else begin
-            stall <= 6'b000000;
-        end
+        if ((rst == `RstEnable)) stall <= 6'b000000;
+        else if (stallreq_from_ex == `Stop) stall <= 6'b001111;
+        else if (stallreq_from_id == `Stop) stall <= 6'b000111;
+        else stall <= 6'b000000;
     end
 endmodule

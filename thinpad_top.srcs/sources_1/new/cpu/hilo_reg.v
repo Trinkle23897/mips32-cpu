@@ -12,13 +12,10 @@ module hilo_reg(
 );
 
     always @ (posedge clk) begin
-        if (rst == `RstEnable) begin
-            hi_o <= `ZeroWord;
-            lo_o <= `ZeroWord;
-        end else if((we == `WriteEnable)) begin
-            hi_o <= hi_i;
-            lo_o <= lo_i;
-        end
+        if (rst == `RstEnable)
+            {hi_o, lo_o} <= {`ZeroWord, `ZeroWord};
+        else if ((we == `WriteEnable))
+            {hi_o, lo_o} <= {hi_i, lo_i};
     end
 
 endmodule

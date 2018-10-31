@@ -10,13 +10,10 @@ module LLbit_reg(
 );
 
     always @ (posedge clk) begin
-        if ((rst == `RstEnable)) begin
+        if (rst == `RstEnable || flush == 1'b1)
             LLbit_o <= 1'b0;
-        end else if((flush == 1'b1)) begin
-            LLbit_o <= 1'b0;
-        end else if((we == `WriteEnable)) begin
+        else if (we == `WriteEnable)
             LLbit_o <= LLbit_i;
-        end
     end
 
 endmodule
