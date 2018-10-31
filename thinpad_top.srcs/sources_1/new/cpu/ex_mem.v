@@ -33,7 +33,7 @@ module ex_mem(
 );
 
     always @ (posedge clk) begin
-        if(rst == `RstEnable) begin
+        if (rst == `RstEnable) begin
             mem_wd <= `NOPRegAddr;
             mem_wreg <= `WriteDisable;
             mem_wdata <= `ZeroWord;
@@ -45,7 +45,7 @@ module ex_mem(
             mem_aluop <= `EXE_NOP_OP;
             mem_mem_addr <= `ZeroWord;
             mem_reg2 <= `ZeroWord;
-        end else if(stall[3] == `Stop && stall[4] == `NoStop) begin
+        end else if (stall[3] == `Stop && stall[4] == `NoStop) begin
             mem_wd <= `NOPRegAddr;
             mem_wreg <= `WriteDisable;
             mem_wdata <= `ZeroWord;
@@ -57,7 +57,7 @@ module ex_mem(
             mem_aluop <= `EXE_NOP_OP;
             mem_mem_addr <= `ZeroWord;
             mem_reg2 <= `ZeroWord;
-        end else if(stall[3] == `NoStop) begin
+        end else if (stall[3] == `NoStop) begin
             mem_wd <= ex_wd;
             mem_wreg <= ex_wreg;
             mem_wdata <= ex_wdata;

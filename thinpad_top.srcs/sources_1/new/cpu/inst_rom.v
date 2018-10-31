@@ -12,9 +12,9 @@ module inst_rom(
     initial $readmemh ("main.data", inst_mem, `StartInstAddr / 4);
     initial $display("addr = %h, data = %h", `StartInstAddr / 4, inst_mem[`StartInstAddr / 4]);
     always @ (*) begin
-        if (ce == `ChipDisable) begin
+        if (ce == `ChipDisable)
             inst <= `ZeroWord;
-        end else begin
+        else begin
             $display("addr = %b, data = %h", addr / 4, inst_mem[addr/4]);
             inst <= inst_mem[addr/4];
         end

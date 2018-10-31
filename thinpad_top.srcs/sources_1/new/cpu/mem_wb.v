@@ -25,7 +25,7 @@ module mem_wb(
 );
 
     always @ (posedge clk) begin
-        if(rst == `RstEnable) begin
+        if (rst == `RstEnable) begin
             wb_wd <= `NOPRegAddr;
             wb_wreg <= `WriteDisable;
             wb_wdata <= `ZeroWord;
@@ -34,7 +34,7 @@ module mem_wb(
             wb_whilo <= `WriteDisable;
             wb_LLbit_we <= 1'b0;
             wb_LLbit_value <= 1'b0;
-        end else if(stall[4] == `Stop && stall[5] == `NoStop) begin
+        end else if (stall[4] == `Stop && stall[5] == `NoStop) begin
             wb_wd <= `NOPRegAddr;
             wb_wreg <= `WriteDisable;
             wb_wdata <= `ZeroWord;
@@ -43,7 +43,7 @@ module mem_wb(
             wb_whilo <= `WriteDisable;
             wb_LLbit_we <= 1'b0;
             wb_LLbit_value <= 1'b0;
-        end else if(stall[4] == `NoStop) begin
+        end else if (stall[4] == `NoStop) begin
             wb_wd <= mem_wd;
             wb_wreg <= mem_wreg;
             wb_wdata <= mem_wdata;

@@ -18,33 +18,24 @@ module data_ram(
     always @ (posedge clk) begin
         if (ce == `ChipDisable) begin
             //data_o <= ZeroWord;
-        end else if(we == `WriteEnable) begin
-            if (sel[3] == 1'b1) begin
-                data_mem3[addr[`DataMemNumLog2+1:2]] <= data_i[31:24];
-            end
-            if (sel[2] == 1'b1) begin
-                data_mem2[addr[`DataMemNumLog2+1:2]] <= data_i[23:16];
-            end
-            if (sel[1] == 1'b1) begin
-                data_mem1[addr[`DataMemNumLog2+1:2]] <= data_i[15:8];
-            end
-            if (sel[0] == 1'b1) begin
-                data_mem0[addr[`DataMemNumLog2+1:2]] <= data_i[7:0];
-            end
+        end else if (we == `WriteEnable) begin
+            if (sel[3] == 1'b1) data_mem3[addr[`DataMemNumLog2+1:2]] <= data_i[31:24];
+            if (sel[2] == 1'b1) data_mem2[addr[`DataMemNumLog2+1:2]] <= data_i[23:16];
+            if (sel[1] == 1'b1) data_mem1[addr[`DataMemNumLog2+1:2]] <= data_i[15:8];
+            if (sel[0] == 1'b1) data_mem0[addr[`DataMemNumLog2+1:2]] <= data_i[7:0];
         end
     end
     
     always @ (*) begin
-        if (ce == `ChipDisable) begin
+        if (ce == `ChipDisable)
             data_o <= `ZeroWord;
-        end else if(we == `WriteDisable) begin
+        else if (we == `WriteDisable)
             data_o <= {data_mem3[addr[`DataMemNumLog2+1:2]],
                        data_mem2[addr[`DataMemNumLog2+1:2]],
                        data_mem1[addr[`DataMemNumLog2+1:2]],
                        data_mem0[addr[`DataMemNumLog2+1:2]]};
-        end else begin
+        else
             data_o <= `ZeroWord;
-        end
     end     
 
 endmodule
