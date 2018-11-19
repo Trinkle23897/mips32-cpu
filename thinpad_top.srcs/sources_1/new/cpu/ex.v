@@ -10,6 +10,8 @@ module ex(
     input wire[`RegAddrBus]       wd_i,
     input wire                    wreg_i,
     input wire[`RegBus]           inst_i,
+    input wire[31:0]              excepttype_i,
+    input wire[`RegBus]           current_inst_address_i,
 
     input wire[`RegBus]           hi_i,
     input wire[`RegBus]           lo_i,
@@ -31,6 +33,21 @@ module ex(
     input wire[`RegBus]           link_address_i,
     input wire                    is_in_delayslot_i,
 
+    input wire                    mem_cp0_reg_we,
+    input wire[4:0]               mem_cp0_reg_write_addr,
+    input wire[`RegBus]           mem_cp0_reg_data,
+
+    input wire                    wb_cp0_reg_we,
+    input wire[4:0]               wb_cp0_reg_write_addr,
+    input wire[`RegBus]           wb_cp0_reg_data,
+
+    input wire[`RegBus]           cp0_reg_data_i,
+    output reg[4:0]               cp0_reg_read_addr_o,
+
+    output reg                    cp0_reg_we_o,
+    output reg[4:0]               cp0_reg_write_addr_o,
+    output reg[`RegBus]           cp0_reg_data_o,
+
     output reg[`RegAddrBus]       wd_o,
     output reg                    wreg_o,
     output reg[`RegBus]           wdata_o,
@@ -50,6 +67,10 @@ module ex(
     output wire[`AluOpBus]        aluop_o,
     output wire[`RegBus]          mem_addr_o,
     output wire[`RegBus]          reg2_o,
+
+    output wire[31:0]             excepttype_o,
+    output wire                   is_in_delayslot_o,
+    output wire[`RegBus]          current_inst_address_o,
 
     output reg                    stallreq
 );
@@ -73,10 +94,17 @@ module ex(
     reg[`DoubleRegBus] hilo_temp1;
     reg stallreq_for_madd_msub;
     reg stallreq_for_div;
+    reg trapassert;
+    reg ovassert;
 
     assign aluop_o = aluop_i;
     assign mem_addr_o = reg1_i + {{16{inst_i[15]}}, inst_i[15:0]};
     assign reg2_o = reg2_i;
+
+    assign excepttype_o = {excepttype_i[31:12], ovassert, trapassert, excepttype_i[9:8], 8'h00};
+
+    assign is_in_delayslot_o = is_in_delayslot_i;
+    assign current_inst_address_o = current_inst_address_i;
 
     always @ (*) begin
         if (rst == `RstEnable)
@@ -103,16 +131,19 @@ module ex(
             endcase
     end
 
-    assign reg2_i_mux = ((aluop_i == `EXE_SUB_OP) || (aluop_i == `EXE_SUBU_OP) || (aluop_i == `EXE_SLT_OP))
-                         ? (~reg2_i)+1 : reg2_i;
+    assign reg2_i_mux = ((aluop_i == `EXE_SUB_OP) || (aluop_i == `EXE_SUBU_OP) || (aluop_i == `EXE_SLT_OP)
+                      || (aluop_i == `EXE_TLT_OP) || (aluop_i == `EXE_TLTI_OP) || (aluop_i == `EXE_TGE_OP) || (aluop_i == `EXE_TGEI_OP))
+                      ? (~reg2_i) + 1 : reg2_i;
     assign result_sum = reg1_i + reg2_i_mux;
     assign ov_sum = ((!reg1_i[31] && !reg2_i_mux[31]) && result_sum[31]) ||
                     ((reg1_i[31] && reg2_i_mux[31]) && (!result_sum[31]));
-    assign reg1_lt_reg2 = ((aluop_i == `EXE_SLT_OP)) ?
-                            ((reg1_i[31] && !reg2_i[31]) ||
-                            (!reg1_i[31] && !reg2_i[31] && result_sum[31])||
-                            (reg1_i[31] && reg2_i[31] && result_sum[31]))
-                        :   (reg1_i < reg2_i);
+
+    assign reg1_lt_reg2 = ((aluop_i == `EXE_SLT_OP) || (aluop_i == `EXE_TLT_OP) || (aluop_i == `EXE_TLTI_OP)
+                        || (aluop_i == `EXE_TGE_OP) || (aluop_i == `EXE_TGEI_OP)) ?
+                          ((reg1_i[31] && !reg2_i[31]) ||
+                          (!reg1_i[31] && !reg2_i[31] && result_sum[31]) ||
+                           (reg1_i[31] && reg2_i[31] && result_sum[31]))
+                        :  (reg1_i < reg2_i);
     assign reg1_i_not = ~reg1_i;
 
     always @ (*) begin
@@ -148,6 +179,21 @@ module ex(
                                       reg1_i_not[1] ? 30 : reg1_i_not[0] ? 31 : 32);
                 default: arithmeticres <= `ZeroWord;
             endcase
+    end
+
+    always @ (*) begin
+        if(rst == `RstEnable) begin
+            trapassert <= `TrapNotAssert;
+        end else begin
+            trapassert <= `TrapNotAssert;
+            case (aluop_i)
+                `EXE_TEQ_OP, `EXE_TEQI_OP: if(reg1_i == reg2_i) trapassert <= `TrapAssert;
+                `EXE_TGE_OP, `EXE_TGEI_OP, `EXE_TGEIU_OP, `EXE_TGEU_OP: if(~reg1_lt_reg2) trapassert <= `TrapAssert;
+                `EXE_TLT_OP, `EXE_TLTI_OP, `EXE_TLTIU_OP, `EXE_TLTU_OP: if(reg1_lt_reg2) trapassert <= `TrapAssert;
+                `EXE_TNE_OP, `EXE_TNEI_OP: if(reg1_i != reg2_i) trapassert <= `TrapAssert;
+                default: trapassert <= `TrapNotAssert;
+            endcase
+        end
     end
 
     assign opdata1_mult = (((aluop_i == `EXE_MUL_OP) || (aluop_i == `EXE_MULT_OP) ||
@@ -289,6 +335,14 @@ module ex(
                 `EXE_MFLO_OP: moveres <= LO;
                 `EXE_MOVZ_OP: moveres <= reg1_i;
                 `EXE_MOVN_OP: moveres <= reg1_i;
+                `EXE_MFC0_OP: begin
+                    cp0_reg_read_addr_o <= inst_i[15:11];
+                    moveres <= cp0_reg_data_i;
+                    if (mem_cp0_reg_we == `WriteEnable && mem_cp0_reg_write_addr == inst_i[15:11])
+                        moveres <= mem_cp0_reg_data;
+                    else if (wb_cp0_reg_we == `WriteEnable && wb_cp0_reg_write_addr == inst_i[15:11])
+                        moveres <= wb_cp0_reg_data;
+                end
                 default:;
             endcase
         end
@@ -297,10 +351,13 @@ module ex(
     always @ (*) begin
         wd_o <= wd_i;
         if (((aluop_i == `EXE_ADD_OP) || (aluop_i == `EXE_ADDI_OP) ||
-            (aluop_i == `EXE_SUB_OP)) && (ov_sum == 1'b1))
+            (aluop_i == `EXE_SUB_OP)) && (ov_sum == 1'b1)) begin
             wreg_o <= `WriteDisable;
-        else
+            ovassert <= 1'b1;
+        end else begin
             wreg_o <= wreg_i;
+            ovassert <= 1'b0;
+        end
         case (alusel_i)
             `EXE_RES_LOGIC: wdata_o <= logicout;
             `EXE_RES_SHIFT: wdata_o <= shiftres;
@@ -337,6 +394,22 @@ module ex(
         end else begin
             whilo_o <= `WriteDisable;
             {hi_o, lo_o} <= {`ZeroWord, `ZeroWord};
+        end
+    end
+
+    always @ (*) begin
+        if (rst == `RstEnable) begin
+            cp0_reg_write_addr_o <= 5'b00000;
+            cp0_reg_we_o <= `WriteDisable;
+            cp0_reg_data_o <= `ZeroWord;
+        end else if (aluop_i == `EXE_MTC0_OP) begin
+            cp0_reg_write_addr_o <= inst_i[15:11];
+            cp0_reg_we_o <= `WriteEnable;
+            cp0_reg_data_o <= reg1_i;
+        end else begin
+            cp0_reg_write_addr_o <= 5'b00000;
+            cp0_reg_we_o <= `WriteDisable;
+            cp0_reg_data_o <= `ZeroWord;
         end
     end
 

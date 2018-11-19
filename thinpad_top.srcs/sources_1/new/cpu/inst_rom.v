@@ -15,8 +15,9 @@ module inst_rom(
         if (ce == `ChipDisable)
             inst <= `ZeroWord;
         else begin
-            $display("addr = %b, data = %h", addr / 4, inst_mem[addr/4]);
+            //$display("addr = %b, data = %h", addr / 4, inst_mem[addr/4]);
             inst <= inst_mem[addr/4];
+            // inst <= inst_mem[addr[`InstMemNumLog2+1:2]];
         end
     end
 
