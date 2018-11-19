@@ -4,12 +4,11 @@ module pc_reg(
     input wire clk,
     input wire rst,
     input wire[5:0] stall,
+    input wire flush,
+    input wire[`RegBus] new_pc,
 
     input wire branch_flag_i,
     input wire[`RegBus] branch_target_address_i,
-
-    input wire flush,
-    input wire[`RegBus] new_pc,
 
     output reg[`InstAddrBus] pc,
     output reg ce
@@ -22,12 +21,11 @@ module pc_reg(
             ce <= `ChipEnable;
     end
 
-    reg is_rst;
-
     always @ (posedge clk) begin
-        is_rst <= rst;
-        if (ce == `ChipDisable || is_rst == `RstEnable)
+        if (ce == `ChipDisable || rst == `RstEnable)
             pc <= `StartInstAddr;
+        else if (flush == 1'b1)
+            pc <= new_pc;
         else if (stall[0] == `NoStop)
             if (branch_flag_i == `Branch)
                 pc <= branch_target_address_i;
