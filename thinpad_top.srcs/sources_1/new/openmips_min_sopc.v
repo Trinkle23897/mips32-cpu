@@ -24,18 +24,18 @@ module openmips_min_sopc(
         .clk(clk),
         .rst(rst),
 
-        .rom_addr_o(inst_addr),
-        .rom_data_i(inst),
-        .rom_ce_o(rom_ce),
+        .if_addr_o(inst_addr),
+        .if_data_i(inst),
+        .if_ce_o(rom_ce),
 
         .int_i(int),
 
-        .ram_we_o(mem_we_i),
-        .ram_addr_o(mem_addr_i),
-        .ram_sel_o(mem_sel_i),
-        .ram_data_o(mem_data_i),
-        .ram_data_i(mem_data_o),
-        .ram_ce_o(mem_ce_i),
+        .mem_we_o(mem_we_i),
+        .mem_addr_o(mem_addr_i),
+        .mem_sel_o(mem_sel_i),
+        .mem_data_o(mem_data_i),
+        .mem_data_i(mem_data_o),
+        .mem_ce_o(mem_ce_i),
         .timer_int_o(timer_int)
     );
 

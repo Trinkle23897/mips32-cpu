@@ -18,6 +18,7 @@ module id(
     input wire[`RegBus]           reg2_data_i,
 
     input wire                    is_in_delayslot_i,
+    input wire[31:0]              excepttype_i,
 
     output reg                    reg1_read_o,
     output reg                    reg2_read_o,
@@ -78,8 +79,7 @@ module id(
 
     // exceptiontype的低8bit留给外部中断，第9bit表示是否是syscall指令
     // 第10bit表示是否是无效指令，第11bit表示是否是trap指令
-    assign excepttype_o = {19'b0, excepttype_is_eret, 2'b0, instvalid, excepttype_is_syscall,8'b0};
-    // assign excepttye_is_trapinst = 1'b0;
+    assign excepttype_o = {excepttype_i[31:13], excepttype_is_eret, excepttype_i[11:10], instvalid, excepttype_is_syscall, 8'b0};
     assign current_inst_address_o = pc_i;
 
     always @ (*) begin
@@ -89,11 +89,11 @@ module id(
             wd_o <= `NOPRegAddr;
             wreg_o <= `WriteDisable;
             instvalid <= `InstValid;
-            reg1_read_o <= 1'b0;
-            reg2_read_o <= 1'b0;
+            reg1_read_o <= `ReadDisable;
+            reg2_read_o <= `ReadDisable;
             reg1_addr_o <= `NOPRegAddr;
             reg2_addr_o <= `NOPRegAddr;
-            imm <= 32'h0;
+            imm <= `ZeroWord;
             link_addr_o <= `ZeroWord;
             branch_target_address_o <= `ZeroWord;
             branch_flag_o <= `NotBranch;
@@ -106,8 +106,8 @@ module id(
             wd_o <= inst_i[15:11];
             wreg_o <= `WriteDisable;
             instvalid <= `InstValid;
-            reg1_read_o <= 1'b0;
-            reg2_read_o <= 1'b0;
+            reg1_read_o <= `ReadDisable;
+            reg2_read_o <= `ReadDisable;
             reg1_addr_o <= inst_i[25:21];
             reg2_addr_o <= inst_i[20:16];
             imm <= `ZeroWord;
@@ -572,14 +572,16 @@ module id(
                 wreg_o <= `WriteDisable; aluop_o <= `EXE_ERET_OP; alusel_o <= `EXE_RES_NOP;
                 reg1_read_o <= 1'b0; reg2_read_o <= 1'b0; instvalid <= `InstValid;
                 excepttype_is_eret<= `True_v;
-            end else if(inst_i[31:21] == 11'b01000000000 && inst_i[10:0] == 11'b00000000000) begin
+            end else if(inst_i[31:21] == 11'b01000000000 && inst_i[10:3] == 8'b00000000) begin
                 wreg_o <= `WriteEnable; aluop_o <= `EXE_MFC0_OP; alusel_o <= `EXE_RES_MOVE;
                 reg1_read_o <= 1'b0; reg2_read_o <= 1'b0; instvalid <= `InstValid;
                 wd_o <= inst_i[20:16];
-            end else if(inst_i[31:21] == 11'b01000000100 && inst_i[10:0] == 11'b00000000000) begin
+            end else if(inst_i[31:21] == 11'b01000000100 && inst_i[10:3] == 8'b00000000) begin
                 wreg_o <= `WriteDisable; aluop_o <= `EXE_MTC0_OP; alusel_o <= `EXE_RES_NOP;
                 reg1_read_o <= 1'b1; reg2_read_o <= 1'b0; instvalid <= `InstValid;
                 reg1_addr_o <= inst_i[20:16];
+            end else if (inst_i == `EXE_TLBWI || inst_i == `EXE_TLBWR) begin
+                instvalid <= `InstValid;
             end
         end
     end

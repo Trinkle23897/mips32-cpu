@@ -17,7 +17,7 @@ module data_ram(
 
     always @ (posedge clk) begin
         if (ce == `ChipDisable) begin
-            //data_o <= ZeroWord;
+            data_o <= `ZeroWord;
         end else if (we == `WriteEnable) begin
             if (sel[3] == 1'b1) data_mem3[addr[`DataMemNumLog2+1:2]] <= data_i[31:24];
             if (sel[2] == 1'b1) data_mem2[addr[`DataMemNumLog2+1:2]] <= data_i[23:16];
@@ -27,9 +27,7 @@ module data_ram(
     end
     
     always @ (*) begin
-        if (ce == `ChipDisable)
-            data_o <= `ZeroWord;
-        else if (we == `WriteDisable)
+        if (ce != `ChipDisable && we == `WriteDisable)
             data_o <= {data_mem3[addr[`DataMemNumLog2+1:2]],
                        data_mem2[addr[`DataMemNumLog2+1:2]],
                        data_mem1[addr[`DataMemNumLog2+1:2]],

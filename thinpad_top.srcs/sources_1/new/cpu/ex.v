@@ -48,6 +48,8 @@ module ex(
     output reg[4:0]               cp0_reg_write_addr_o,
     output reg[`RegBus]           cp0_reg_data_o,
 
+    output wire[`RegBus]          inst_o,
+
     output reg[`RegAddrBus]       wd_o,
     output reg                    wreg_o,
     output reg[`RegBus]           wdata_o,
@@ -100,6 +102,12 @@ module ex(
     assign aluop_o = aluop_i;
     assign mem_addr_o = reg1_i + {{16{inst_i[15]}}, inst_i[15:0]};
     assign reg2_o = reg2_i;
+    assign inst_o = inst_i;
+
+    assign excepttype_o = {excepttype_i[31:12], ovassert, trapassert, excepttype_i[9:8], 8'h00};
+
+    assign is_in_delayslot_o = is_in_delayslot_i;
+    assign current_inst_address_o = current_inst_address_i;
 
     assign excepttype_o = {excepttype_i[31:12], ovassert, trapassert, excepttype_i[9:8], 8'h00};
 
