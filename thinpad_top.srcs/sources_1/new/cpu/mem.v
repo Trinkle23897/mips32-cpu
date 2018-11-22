@@ -76,6 +76,7 @@ module mem(
     reg[`RegBus] cp0_cause;
     reg[`RegBus] cp0_epc;
     reg mem_we;
+    reg eret_err;
 
     assign mem_we_o = mem_we & (~(|excepttype_o));
     assign zero32 = `ZeroWord;
@@ -89,6 +90,9 @@ module mem(
     assign is_in_delayslot_o = is_in_delayslot_i;
     assign current_inst_address_o = current_inst_address_i;
     assign cp0_epc_o = cp0_epc;
+
+    reg load_alignment_error;
+    reg store_alignment_error;
 
     always @ (*) begin
         if (rst == `RstEnable) begin
@@ -120,6 +124,9 @@ module mem(
             cp0_reg_we_o <= `WriteDisable;
             cp0_reg_write_addr_o <= 5'b00000;
             cp0_reg_data_o <= `ZeroWord;
+            load_alignment_error <= `False_v;
+            store_alignment_error <= `False_v;
+            eret_err <= `False_v;
         end else begin
             wd_o <= wd_i;
             wreg_o <= wreg_i;
@@ -136,6 +143,8 @@ module mem(
             cp0_reg_we_o <= cp0_reg_we_i;
             cp0_reg_write_addr_o <= cp0_reg_write_addr_i;
             cp0_reg_data_o <= cp0_reg_data_i;
+            load_alignment_error <= `False_v;
+            store_alignment_error <= `False_v;
             case (aluop_i)
                 `EXE_LB_OP: begin
                     mem_addr_o <= physical_addr;
@@ -158,7 +167,12 @@ module mem(
                             wdata_o <= {{24{mem_data_i[31]}}, mem_data_i[31:24]};
                             mem_sel_o <= 4'b1000;
                         end
-                        default: wdata_o <= `ZeroWord;
+                        default: begin
+                            wdata_o <= `ZeroWord;
+                            mem_sel_o <= 4'b0000;
+                            mem_ce_o <= `ChipDisable;
+                            load_alignment_error <= `True_v;
+                        end
                     endcase
                 end
                 `EXE_LBU_OP: begin
@@ -182,7 +196,12 @@ module mem(
                             wdata_o <= {{24{1'b0}}, mem_data_i[31:24]};
                             mem_sel_o <= 4'b1000;
                         end
-                        default: wdata_o <= `ZeroWord;
+                        default: begin
+                            wdata_o <= `ZeroWord;
+                            mem_sel_o <= 4'b0000;
+                            mem_ce_o <= `ChipDisable;
+                            load_alignment_error <= `True_v;
+                        end
                     endcase
                 end
                 `EXE_LH_OP: begin
@@ -198,7 +217,12 @@ module mem(
                             wdata_o <= {{16{mem_data_i[31]}}, mem_data_i[31:16]};
                             mem_sel_o <= 4'b1100;
                         end
-                        default: wdata_o <= `ZeroWord;
+                        default: begin
+                            wdata_o <= `ZeroWord;
+                            mem_sel_o <= 4'b0000;
+                            mem_ce_o <= `ChipDisable;
+                            load_alignment_error <= `True_v;
+                        end
                     endcase
                 end
                 `EXE_LHU_OP: begin
@@ -214,7 +238,12 @@ module mem(
                             wdata_o <= {{16{1'b0}}, mem_data_i[31:16]};
                             mem_sel_o <= 4'b1100;
                         end
-                        default: wdata_o <= `ZeroWord;
+                        default: begin
+                            wdata_o <= `ZeroWord;
+                            mem_sel_o <= 4'b0000;
+                            mem_ce_o <= `ChipDisable;
+                            load_alignment_error <= `True_v;
+                        end
                     endcase
                 end
                 `EXE_LW_OP: begin
@@ -229,6 +258,8 @@ module mem(
                         default: begin
                             mem_sel_o <= 4'b0000;
                             wdata_o <= `ZeroWord;
+                            mem_ce_o <= `ChipDisable;
+                            load_alignment_error <= `True_v;
                         end
                     endcase
                 end
@@ -242,7 +273,11 @@ module mem(
                         2'b01: wdata_o <= {mem_data_i[15:0], reg2_i[15:0]};
                         2'b10: wdata_o <= {mem_data_i[23:0], reg2_i[7:0]};
                         2'b11: wdata_o <= mem_data_i[31:0];
-                        default: wdata_o <= `ZeroWord;
+                        default: begin
+                            wdata_o <= `ZeroWord;
+                            mem_ce_o <= `ChipDisable;
+                            load_alignment_error <= `True_v;
+                        end
                     endcase
                 end
                 `EXE_LWR_OP: begin
@@ -255,17 +290,31 @@ module mem(
                         2'b01: wdata_o <= {reg2_i[31:24], mem_data_i[31:8]};
                         2'b10: wdata_o <= {reg2_i[31:16], mem_data_i[31:16]};
                         2'b11: wdata_o <= {reg2_i[31:8], mem_data_i[31:24]};
-                        default: wdata_o <= `ZeroWord;
+                        default: begin
+                            wdata_o <= `ZeroWord;
+                            mem_ce_o <= `ChipDisable;
+                            load_alignment_error <= `True_v;
+                        end
                     endcase
                 end
                 `EXE_LL_OP: begin
                     mem_addr_o <= physical_addr;
                     mem_we <= `WriteDisable;
-                    wdata_o <= mem_data_i;
                     LLbit_we_o <= 1'b1;
                     LLbit_value_o <= 1'b1;
-                    mem_sel_o <= 4'b1111;
                     mem_ce_o <= `ChipEnable;
+                    case (physical_addr[1:0])
+                        2'b00: begin
+                            wdata_o <= mem_data_i;
+                            mem_sel_o <= 4'b1111;
+                        end
+                        default: begin
+                            wdata_o <= `ZeroWord;
+                            mem_sel_o <= 4'b0000;
+                            mem_ce_o <= `ChipDisable;
+                            load_alignment_error <= `True_v;
+                        end
+                    endcase
                 end
                 `EXE_SB_OP: begin
                     mem_addr_o <= physical_addr;
@@ -277,7 +326,11 @@ module mem(
                         2'b01: mem_sel_o <= 4'b0010;
                         2'b10: mem_sel_o <= 4'b0100;
                         2'b11: mem_sel_o <= 4'b1000;
-                        default: mem_sel_o <= 4'b0000;
+                        default: begin
+                            mem_sel_o <= 4'b0000;
+                            mem_ce_o <= `ChipDisable;
+                            store_alignment_error <= `True_v;
+                        end
                     endcase
                 end
                 `EXE_SH_OP: begin
@@ -288,7 +341,11 @@ module mem(
                     case (physical_addr[1:0])
                         2'b00: mem_sel_o <= 4'b0011;
                         2'b10: mem_sel_o <= 4'b1100;
-                        default: mem_sel_o <= 4'b0000;
+                        default: begin
+                            mem_sel_o <= 4'b0000;
+                            mem_ce_o <= `ChipDisable;
+                            store_alignment_error <= `True_v;
+                        end
                     endcase
                 end
                 `EXE_SW_OP: begin
@@ -298,7 +355,11 @@ module mem(
                     mem_ce_o <= `ChipEnable;
                     case (physical_addr[1:0])
                         2'b00: mem_sel_o <= 4'b1111;
-                        default: mem_sel_o <= 4'b0000;
+                        default: begin
+                            mem_sel_o <= 4'b0000;
+                            mem_ce_o <= `ChipDisable;
+                            store_alignment_error <= `True_v;
+                        end
                     endcase
                 end
                 `EXE_SWL_OP: begin
@@ -322,7 +383,12 @@ module mem(
                             mem_sel_o <= 4'b1111;
                             mem_data_o <= reg2_i;
                         end
-                        default: mem_sel_o <= 4'b0000;
+                        default: begin
+                            mem_sel_o <= 4'b0000;
+                            mem_ce_o <= `ChipDisable;
+                            mem_data_o <= `ZeroWord;
+                            store_alignment_error <= `True_v;
+                        end
                     endcase
                 end
                 `EXE_SWR_OP: begin
@@ -346,7 +412,12 @@ module mem(
                             mem_sel_o <= 4'b1000;
                             mem_data_o <= {reg2_i[7:0], zero32[23:0]};
                         end
-                        default: mem_sel_o <= 4'b0000;
+                        default: begin
+                            mem_sel_o <= 4'b0000;
+                            mem_ce_o <= `ChipDisable;
+                            mem_data_o <= `ZeroWord;
+                            store_alignment_error <= `True_v;
+                        end
                     endcase
                 end
                 `EXE_SC_OP: begin
@@ -357,10 +428,22 @@ module mem(
                         mem_we <= `WriteEnable;
                         mem_data_o <= reg2_i;
                         wdata_o <= 32'b1;
-                        mem_sel_o <= 4'b1111;
                         mem_ce_o <= `ChipEnable;
-                    end else
+                        case (physical_addr[1:0])
+                            2'b00: mem_sel_o <= 4'b1111;
+                            default: begin
+                                mem_sel_o <= 4'b0000;
+                                mem_ce_o <= `ChipDisable;
+                                store_alignment_error <= `True_v;
+                            end
+                        endcase
+                    end else begin
                         wdata_o <= 32'b0;
+                        mem_ce_o <= `ChipDisable;
+                        mem_addr_o <= physical_addr;
+                        mem_we <= `WriteEnable;
+                        mem_data_o <= `ZeroWord;
+                    end
                 end
                 default:;
             endcase
@@ -377,12 +460,18 @@ module mem(
     end
 
     always @ (*) begin
+        eret_err <= `False_v;
         if (rst == `RstEnable)
             cp0_epc <= `ZeroWord;
-        else if ((wb_cp0_reg_we == `WriteEnable) && (wb_cp0_reg_write_addr == `CP0_REG_EPC))
+        else if ((wb_cp0_reg_we == `WriteEnable) && (wb_cp0_reg_write_addr == `CP0_REG_EPC)) begin
             cp0_epc <= wb_cp0_reg_data;
-        else
+            if (wb_cp0_reg_data[1:0] != 2'b00 && excepttype_i[12] == 1'b1)
+                eret_err <= `True_v;
+        end else begin
             cp0_epc <= cp0_epc_i;
+            if (cp0_epc_i[1:0] != 2'b00 && excepttype_i[12] == 1'b1)
+                eret_err <= `True_v;
+        end
     end
 
     always @ (*) begin
@@ -406,9 +495,21 @@ module mem(
                 if (((cp0_cause[15:8] & cp0_status[15:8]) != 8'h00) && (cp0_status[1] == 1'b0) && (cp0_status[0] == 1'b1)) excepttype_o <= 32'h00000001; // interrupt
                 else if (excepttype_i[8] == 1'b1) excepttype_o <= 32'h00000008; // syscall
                 else if (excepttype_i[9] == 1'b1) excepttype_o <= 32'h0000000a; // inst_invalid
-                else if (excepttype_i[10] == 1'b1) excepttype_o <= 32'h0000000d; // trap
+                else if (excepttype_i[10] == 1'b1) excepttype_o <= 32'h0000000d; // break not trap
                 else if (excepttype_i[11] == 1'b1) excepttype_o <= 32'h0000000c; // ov
+                else if (eret_err == `True_v) begin
+                    excepttype_o <= 32'h00000004;
+                    bad_address <= wb_cp0_reg_data;
+                end
                 else if (excepttype_i[12] == 1'b1) excepttype_o <= 32'h0000000e; // eret
+                else if (load_alignment_error == `True_v) begin // AdEL
+                    excepttype_o <= 32'h00000004;
+                    bad_address <= mem_addr_i;
+                end
+                else if (store_alignment_error == `True_v) begin // AdES
+                    excepttype_o <= 32'h00000005;
+                    bad_address <= mem_addr_i;
+                end
                 else if (excepttype_i[13] == 1'b1) begin
                     excepttype_o <= 32'h0000000f;
                     bad_address <= current_inst_address_i;
@@ -418,7 +519,7 @@ module mem(
                 end else if (tlb_hit == 1'b0 && mem_ce_o == 1'b1 && mem_we == `WriteEnable) begin
                     excepttype_o <= 32'h0000000b;
                     bad_address <= mem_addr_i;
-                end 
+                end
             end
         end
     end
