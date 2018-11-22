@@ -24,7 +24,7 @@
 `define False_v 1'b0
 `define ChipEnable 1'b1
 `define ChipDisable 1'b0
-`define StartInstAddr 32'hbfc00000
+`define StartInstAddr 32'h80000000
 
 // Instruction Number
 `define EXE_AND 6'b100100
@@ -106,7 +106,8 @@
 `define EXE_SWR 6'b101110
 
 `define EXE_SYSCALL 6'b001100
-   
+`define EXE_BREAK 6'b001101
+
 `define EXE_TEQ 6'b110100
 `define EXE_TEQI 5'b01100
 `define EXE_TGE 6'b110000

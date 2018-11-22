@@ -37,15 +37,17 @@ module ctrl(
             mem_we_o <= 1'b0;
             stall <= 6'b000000;
             case (excepttype_i)
-                32'h00000001: new_pc <= ebase_i; //interrupt
-                32'h00000008: new_pc <= ebase_i; //syscall
-                32'h0000000a: new_pc <= ebase_i; //inst_invalid
-                32'h0000000d: new_pc <= ebase_i; //trap
-                32'h0000000c: new_pc <= ebase_i; //ov
-                32'h0000000e: new_pc <= cp0_epc_i; //eret
+                32'h00000001: new_pc <= ebase_i + 32'h180; // interrupt
+                32'h00000004: new_pc <= ebase_i + 32'h180; // AdEL
+                32'h00000005: new_pc <= ebase_i + 32'h180; // AdES
+                32'h00000008: new_pc <= ebase_i + 32'h180; // syscall
+                32'h0000000a: new_pc <= ebase_i + 32'h180; // inst_invalid
+                32'h0000000d: new_pc <= ebase_i + 32'h180; // break
+                32'h0000000c: new_pc <= ebase_i + 32'h180; // ov
+                32'h0000000e: new_pc <= cp0_epc_i; // eret
                 32'h0000000f: new_pc <= ebase_i; // tlbmiss, need to be change to uCore
                 32'h0000000b: new_pc <= ebase_i;
-                default: new_pc <= ebase_i;
+                default:;
             endcase
         end else if (stallreq_from_ex == `Stop) begin
             stall <= 6'b001111;

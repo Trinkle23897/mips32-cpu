@@ -109,11 +109,6 @@ module ex(
     assign is_in_delayslot_o = is_in_delayslot_i;
     assign current_inst_address_o = current_inst_address_i;
 
-    assign excepttype_o = {excepttype_i[31:12], ovassert, trapassert, excepttype_i[9:8], 8'h00};
-
-    assign is_in_delayslot_o = is_in_delayslot_i;
-    assign current_inst_address_o = current_inst_address_i;
-
     always @ (*) begin
         if (rst == `RstEnable)
             logicout <= `ZeroWord;

@@ -153,7 +153,7 @@ module cp0_reg(
                         end
                     end
                     status_o[1] <= 1'b1;
-                    cause_o[6:2] <= 5'b01101;
+                    cause_o[6:2] <= 5'b01001;
                 end
                 32'h0000000c: begin
                     if (status_o[1] == 1'b0) begin
@@ -167,7 +167,35 @@ module cp0_reg(
                     end
                     status_o[1] <= 1'b1;
                     cause_o[6:2] <= 5'b01100;
-                end             
+                end
+                32'h00000004: begin
+                    if (status_o[1] == 1'b0) begin
+                        if (is_in_delayslot_i == `InDelaySlot) begin
+                            epc_o <= current_inst_addr_i - 4;
+                            cause_o[31] <= 1'b1;
+                        end else begin
+                            epc_o <= current_inst_addr_i;
+                            cause_o[31] <= 1'b0;
+                        end
+                    end
+                    status_o[1] <= 1'b1;
+                    cause_o[6:2] <= 5'b00100;
+                    badvaddr_o <= bad_address_i;
+                end
+                32'h00000005: begin
+                    if (status_o[1] == 1'b0) begin
+                        if (is_in_delayslot_i == `InDelaySlot) begin
+                            epc_o <= current_inst_addr_i - 4;
+                            cause_o[31] <= 1'b1;
+                        end else begin
+                            epc_o <= current_inst_addr_i;
+                            cause_o[31] <= 1'b0;
+                        end
+                    end
+                    status_o[1] <= 1'b1;
+                    cause_o[6:2] <= 5'b00101;
+                    badvaddr_o <= bad_address_i;
+                end
                 32'h0000000e: status_o[1] <= 1'b0;
                 32'h0000000f: begin
                     if (status_o[1] == 1'b0) begin
