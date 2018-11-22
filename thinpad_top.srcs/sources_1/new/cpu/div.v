@@ -27,6 +27,11 @@ module div(
             state <= `DivFree;
             ready_o <= `DivResultNotReady;
             result_o <= {`ZeroWord, `ZeroWord};
+            dividend <= 65'b0;
+            cnt <= 6'b0;
+            divisor <= `ZeroWord;
+            temp_op1 <= `ZeroWord;
+            temp_op2 <= `ZeroWord;
         end else begin
             case (state)
                 `DivFree: begin
