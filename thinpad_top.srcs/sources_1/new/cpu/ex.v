@@ -329,10 +329,12 @@ module ex(
     end
 
     always @ (*) begin
-        if (rst == `RstEnable)
+        if (rst == `RstEnable) begin
             moveres <= `ZeroWord;
-        else begin
+            cp0_reg_read_addr_o <= 2'b00;
+        end else begin
             moveres <= `ZeroWord;
+            cp0_reg_read_addr_o <= 2'b00;
             case (aluop_i)
                 `EXE_MFHI_OP: moveres <= HI;
                 `EXE_MFLO_OP: moveres <= LO;
