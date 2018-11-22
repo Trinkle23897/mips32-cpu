@@ -14,7 +14,10 @@ module regfile(
 
     input wire re2,
     input wire[`RegAddrBus] raddr2,
-    output reg[`RegBus] rdata2
+    output reg[`RegBus] rdata2,
+
+    output reg[`RegBus] reg4,
+    output reg[`RegBus] reg19
 );
 
     reg[`RegBus] regs[0:`RegNum-1];
@@ -35,6 +38,8 @@ module regfile(
             rdata1 <= regs[raddr1];
         else
             rdata1 <= `ZeroWord;
+        reg4 <= regs[4];
+        reg19 <= regs[19];
     end
 
     always @ (*) begin

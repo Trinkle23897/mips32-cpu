@@ -1,4 +1,4 @@
-`include "../defines.v"
+`include "defines.v"
 
 module openmips(
     input wire clk,
@@ -27,7 +27,10 @@ module openmips(
     output wire mem_vga_ce_o,
     output wire mem_ce_o,
 
-    output wire timer_int_o
+    output wire timer_int_o,
+
+    output wire[`RegBus] reg4,
+    output wire[`RegBus] reg19
 );
 
     wire[`InstAddrBus] pc;
@@ -320,7 +323,9 @@ module openmips(
         .rdata1(reg1_data),
         .re2(reg2_read),
         .raddr2(reg2_addr),
-        .rdata2(reg2_data)
+        .rdata2(reg2_data),
+        .reg4(reg4),
+        .reg19(reg19)
     );
 
     id_ex id_ex0(
