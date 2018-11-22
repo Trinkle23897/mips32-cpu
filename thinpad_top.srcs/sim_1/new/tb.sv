@@ -40,8 +40,8 @@ wire flash_we_n;         //Flash写使能信号，低有效
 wire flash_byte_n;       //Flash 8bit模式选择，低有效。在使用flash的16位模式时请设为1
 
 //Windows需要注意路径分隔符的转义，例如"D:\\foo\\bar.bin"
-parameter BASE_RAM_INIT_FILE = "/tmp/main.bin"; //BaseRAM初始化文件，请修改为实际的绝对路径
-parameter EXT_RAM_INIT_FILE = "/tmp/eram.bin";    //ExtRAM初始化文件，请修改为实际的绝对路径
+parameter BASE_RAM_INIT_FILE = "D:\\workspace\\mips32-cpu\\thinpad_top.srcs\\sim_1\\new\\main.bin"; //BaseRAM初始化文件，请修改为实际的绝对路径
+parameter EXT_RAM_INIT_FILE = "D:\\workspace\\mips32-cpu\\thinpad_top.srcs\\sim_1\\new\\main.bin";    //ExtRAM初始化文件，请修改为实际的绝对路径
 parameter FLASH_INIT_FILE = "/tmp/kernel.elf";    //Flash初始化文件，请修改为实际的绝对路径
 
 assign rxd = 1'b1; //idle state
@@ -50,6 +50,8 @@ initial begin
     //在这里可以自定义测试输入序列，例如：
     dip_sw = 32'h2;
     touch_btn = 0;
+    reset_btn <= 1;
+    #195 reset_btn <= 0;
     for (integer i = 0; i < 20; i = i++) begin
         #100; //等待100ns
         clock_btn = 1; //按下手工时钟按钮
