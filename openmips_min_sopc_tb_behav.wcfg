@@ -12,17 +12,21 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="4779641853934fs"></ZoomEndTime>
-      <Cursor1Time time="1236086500000fs"></Cursor1Time>
+      <ZoomEndTime time="8430000000001fs"></ZoomEndTime>
+      <Cursor1Time time="6010000000000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="134"></NameColumnWidth>
+      <NameColumnWidth column_width="118"></NameColumnWidth>
       <ValueColumnWidth column_width="61"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="3" />
+   <WVObjectSize size="13" />
    <wvobject type="logic" fp_name="/tb/dut/clk_10M">
       <obj_property name="ElementShortName">clk_10M</obj_property>
       <obj_property name="ObjectShortName">clk_10M</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb/clk_50M">
+      <obj_property name="ElementShortName">clk_50M</obj_property>
+      <obj_property name="ObjectShortName">clk_50M</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb/dut/openmips_reg4">
       <obj_property name="ElementShortName">openmips_reg4[31:0]</obj_property>
@@ -31,5 +35,41 @@
    <wvobject type="array" fp_name="/tb/dut/openmips_reg19">
       <obj_property name="ElementShortName">openmips_reg19[31:0]</obj_property>
       <obj_property name="ObjectShortName">openmips_reg19[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb/dut/openmips0/ex0/reg1_i">
+      <obj_property name="ElementShortName">reg1_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">reg1_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb/dut/openmips0/ex0/reg2_i">
+      <obj_property name="ElementShortName">reg2_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">reg2_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb/dut/openmips0/pc_reg0/physical_pc">
+      <obj_property name="ElementShortName">physical_pc[31:0]</obj_property>
+      <obj_property name="ObjectShortName">physical_pc[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb/dut/openmips0/pc_reg0/virtual_pc">
+      <obj_property name="ElementShortName">virtual_pc[31:0]</obj_property>
+      <obj_property name="ObjectShortName">virtual_pc[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb/dut/openmips0/id0/inst_i">
+      <obj_property name="ElementShortName">inst_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">inst_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb/dut/openmips0/mmu_tlb0/addr_i">
+      <obj_property name="ElementShortName">addr_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">addr_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb/dut/openmips0/mmu_tlb0/addr_o">
+      <obj_property name="ElementShortName">addr_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">addr_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb/dut/openmips0/if_id0/if_pc">
+      <obj_property name="ElementShortName">if_pc[31:0]</obj_property>
+      <obj_property name="ObjectShortName">if_pc[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb/dut/openmips0/if_id0/if_inst">
+      <obj_property name="ElementShortName">if_inst[31:0]</obj_property>
+      <obj_property name="ObjectShortName">if_inst[31:0]</obj_property>
    </wvobject>
 </wave_config>
