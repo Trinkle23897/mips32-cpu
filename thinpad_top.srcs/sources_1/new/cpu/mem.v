@@ -76,16 +76,12 @@ module mem(
     reg[`RegBus] cp0_cause;
     reg[`RegBus] cp0_epc;
     reg mem_we;
-    reg eret_err;
+    reg[1:0] eret_err;
 
     assign mem_we_o = mem_we & (~(|excepttype_o));
     assign zero32 = `ZeroWord;
     assign inst_o = inst_i;
     assign virtual_addr = mem_addr_i;
-
-    assign is_in_delayslot_o = is_in_delayslot_i;
-    assign current_inst_address_o = current_inst_address_i;
-    assign cp0_epc_o = cp0_epc;
 
     assign is_in_delayslot_o = is_in_delayslot_i;
     assign current_inst_address_o = current_inst_address_i;
@@ -126,7 +122,6 @@ module mem(
             cp0_reg_data_o <= `ZeroWord;
             load_alignment_error <= `False_v;
             store_alignment_error <= `False_v;
-            eret_err <= `False_v;
         end else begin
             wd_o <= wd_i;
             wreg_o <= wreg_i;
@@ -460,17 +455,25 @@ module mem(
     end
 
     always @ (*) begin
-        eret_err <= `False_v;
-        if (rst == `RstEnable)
+        if (rst == `RstEnable) begin
             cp0_epc <= `ZeroWord;
-        else if ((wb_cp0_reg_we == `WriteEnable) && (wb_cp0_reg_write_addr == `CP0_REG_EPC)) begin
-            cp0_epc <= wb_cp0_reg_data;
-            if (wb_cp0_reg_data[1:0] != 2'b00 && excepttype_i[12] == 1'b1)
-                eret_err <= `True_v;
+            eret_err <= 2'b00;
+        end else if ((wb_cp0_reg_we == `WriteEnable) && (wb_cp0_reg_write_addr == `CP0_REG_EPC)) begin
+            if (wb_cp0_reg_data[1:0] != 2'b00 && excepttype_i[12] == 1'b1) begin
+                cp0_epc <= `ZeroWord;
+                eret_err <= 2'b01;
+            end else begin
+                cp0_epc <= wb_cp0_reg_data;
+                eret_err <= 2'b00;
+            end
         end else begin
-            cp0_epc <= cp0_epc_i;
-            if (cp0_epc_i[1:0] != 2'b00 && excepttype_i[12] == 1'b1)
-                eret_err <= `True_v;
+            if (cp0_epc_i[1:0] != 2'b00 && excepttype_i[12] == 1'b1) begin
+                cp0_epc <= `ZeroWord;
+                eret_err <= 2'b10;
+            end else begin
+                cp0_epc <= cp0_epc_i;
+                eret_err <= 2'b00;
+            end
         end
     end
 
@@ -497,9 +500,12 @@ module mem(
                 else if (excepttype_i[9] == 1'b1) excepttype_o <= 32'h0000000a; // inst_invalid
                 else if (excepttype_i[10] == 1'b1) excepttype_o <= 32'h0000000d; // break not trap
                 else if (excepttype_i[11] == 1'b1) excepttype_o <= 32'h0000000c; // ov
-                else if (eret_err == `True_v) begin
+                else if (eret_err == 2'b01 || eret_err == 2'b10) begin
                     excepttype_o <= 32'h00000004;
-                    bad_address <= wb_cp0_reg_data;
+                    if (eret_err == 2'b01)
+                        bad_address <= wb_cp0_reg_data;
+                    else if (eret_err == 2'b10)
+                        bad_address <= cp0_epc_i;
                 end
                 else if (excepttype_i[12] == 1'b1) excepttype_o <= 32'h0000000e; // eret
                 else if (load_alignment_error == `True_v) begin // AdEL
