@@ -84,12 +84,13 @@ module thinpad_top(
 /* =========== Demo code begin =========== */
 
 // PLL分频示例
-wire locked, clk_10M, clk_20M;
+wire locked, clk_10M, clk_20M, clk_25M;
 pll_example clock_gen 
 (
     // Clock out ports
     .clk_out1(clk_10M), // 时钟输出1，频率在IP配置界面中设置
     .clk_out2(clk_20M), // 时钟输出2，频率在IP配置界面中设置
+    .clk_out3(clk_25M),
     // Status and control signals
     .reset(reset_btn), // PLL复位输入
     .locked(locked), // 锁定输出，"1"表示时钟稳定，可作为后级电路复位
@@ -219,7 +220,7 @@ always @(posedge ext_uart_ready) begin
     end
 end
 openmips openmips0(
-    .clk(clk_10M), // 25MHz
+    .clk(clk_25M), // 25MHz
     .rst(reset_btn),
 
     .if_addr_o(openmips_if_addr_o),
@@ -396,7 +397,7 @@ always @(*) begin
                     ext_ram_oe_n <= 1'b0;
                     ext_ram_we_n <= 1'b1;
                     openmips_if_data_i <= ext_ram_data;
-                end       
+                end
             end else if (openmips_if_flash_ce_o) begin
                 flash_a <= openmips_if_addr_o[23:1];
                 flash_rp_n <= 1'b1;
