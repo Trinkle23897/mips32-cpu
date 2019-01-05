@@ -61,13 +61,11 @@ Basic CPU Implementation
 
 # Third Milestone
 
-运行监控程序，提频
+运行监控程序，提频，40M
 
 ### 运行方法
 
 按照监控里面的readme安装完并编译完之后上传kernel.bin，记得位置选项选择直连串口，然后才能调试
-
-目前第六个测例有bug，先加了两句nop（雾，目测是sram没状态机
 
 ```bash
 ➜  term git:(75bf515) ✗ python3 term.py -t 166.111.227.237:40965
@@ -96,11 +94,31 @@ elapsed time: 5.872s
 >> G
 >>addr: 0x800020d8
 
-elapsed time: 12.583s
+elapsed time: 12.584s
 ```
+
+显示图片：
+
+```mips
+    lui t0, 8
+    lui t1, 0x8040
+    lui t2, 0xba00
+.VGA:
+    lb t3, 0(t1)
+    nop 
+    sb t3, 0(t2)
+    nop 
+    addiu t0, t0, -1
+    addiu t1, t1, 1
+    addiu t2, t2, 1
+    bnez t0, .VGA
+    nop 
+```
+
+然后将图片转换成bin文件（给好了一个在bit/pic.bin），传到ExtRam里面，然后运行这段汇编代码即可看到vga中显示图像。
 
 # Fourth Milestone
 
 运行uCore
 
-TODO
+跑不起来，鸽了
