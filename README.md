@@ -105,9 +105,7 @@ elapsed time: 12.584s
     lui t2, 0xba00
 .VGA:
     lb t3, 0(t1)
-    nop 
     sb t3, 0(t2)
-    nop 
     addiu t0, t0, -1
     addiu t1, t1, 1
     addiu t2, t2, 1
