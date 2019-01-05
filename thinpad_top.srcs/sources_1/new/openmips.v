@@ -205,6 +205,7 @@ module openmips(
 
     wire[`RegBus] latest_epc;
     wire we_from_mem;
+    wire ex_is_load;
 
     pc_reg pc_reg0(
         .clk(clk),
@@ -434,7 +435,9 @@ module openmips(
         .is_in_delayslot_o(ex_is_in_delayslot_o),
         .current_inst_address_o(ex_current_inst_address_o),
 
-        .stallreq(stallreq_from_ex)
+        .stallreq(stallreq_from_ex),
+
+        .is_load_o(ex_is_load)
     );
 
     ex_mem ex_mem0(
@@ -650,7 +653,8 @@ module openmips(
         .mem_we_i(we_from_mem),
         .mem_we_o(mem_we_o),
         .stall(stall),
-        .ebase_i(cp0_ebase)
+        .ebase_i(cp0_ebase),
+        .is_load_i(ex_is_load)
     );
 
     div div0(

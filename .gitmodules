@@ -4,3 +4,12 @@
 [submodule "cpu_testcase"]
 	path = cpu_testcase
 	url = https://github.com/z4yx/cpu-testcase.git
+[submodule "supervisor-mips32"]
+	path = supervisor-mips32
+	url = https://github.com/z4yx/supervisor-mips32.git
+[submodule "ucore-thumips"]
+	path = ucore-thumips
+	url = https://github.com/z4yx/ucore-thumips.git
+[submodule "qemu-thumips"]
+	path = qemu-thumips
+	url = https://github.com/chyh1990/qemu-thumips.git

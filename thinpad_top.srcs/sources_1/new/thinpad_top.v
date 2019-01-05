@@ -84,36 +84,38 @@ module thinpad_top(
 /* =========== Demo code begin =========== */
 
 // PLL分频示例
-wire locked, clk_10M, clk_20M, clk_25M;
+wire locked, clk_80M, clk_40M;
+
+
 pll_example clock_gen 
 (
     // Clock out ports
-    .clk_out1(clk_10M), // 时钟输出1，频率在IP配置界面中设置
-    .clk_out2(clk_20M), // 时钟输出2，频率在IP配置界面中设置
-    .clk_out3(clk_25M),
+    .clk_out1(clk_80M), // 时钟输出1，频率在IP配置界面中设置
+    .clk_out2(clk_40M), // 时钟输出2，频率在IP配置界面中设置
+
     // Status and control signals
     .reset(reset_btn), // PLL复位输入
     .locked(locked), // 锁定输出，"1"表示时钟稳定，可作为后级电路复位
     // Clock in ports
     .clk_in1(clk_50M) // 外部时钟输入
 );
-
-reg reset_of_clk10M;
+/*
+reg reset_of_clk100M;
 // 异步复位，同步释放
-always@(posedge clk_10M or negedge locked) begin
-    if(~locked) reset_of_clk10M <= 1'b1;
-    else        reset_of_clk10M <= 1'b0;
+always@(posedge clk_100M or negedge locked) begin
+    if(~locked) reset_of_clk100M <= 1'b1;
+    else        reset_of_clk100M <= 1'b0;
 end
 
-always@(posedge clk_10M or posedge reset_of_clk10M) begin
-    if(reset_of_clk10M)begin
+always@(posedge clk_100M or posedge reset_of_clk100M) begin
+    if(reset_of_clk100M)begin
         // Your Code
     end
     else begin
         // Your Code
     end
 end
-
+*/
 // 数码管连接关系示意图，dpy1同理
 // p=dpy0[0] // ---a---
 // c=dpy0[1] // |     |
@@ -152,7 +154,7 @@ wire ext_uart_ready, ext_uart_busy;
 reg ext_uart_start_reg, ext_uart_start, ext_uart_avai;
 reg [1:0] counter;
 
-always @(posedge clk_50M) begin
+always @(posedge clk_40M) begin
     if (reset_btn) begin
         ext_uart_tx_reg <= 8'b0;
         ext_uart_start_reg <= 1'b0;
@@ -171,18 +173,18 @@ always @(posedge clk_50M) begin
         end
     end
 end
-async_receiver #(.ClkFrequency(50000000),.Baud(9600)) //接收模块，9600无检验位
+async_receiver #(.ClkFrequency(40000000),.Baud(9600)) //接收模块，9600无检验位
     ext_uart_r(
-        .clk(clk_50M),                       //外部时钟信号
+        .clk(clk_40M),                       //外部时钟信号
         .RxD(rxd),                           //外部串行信号输入
         .RxD_data_ready(ext_uart_ready),  //数据接收到标志
         .RxD_clear(ext_uart_ready),       //清除接收标志
         .RxD_data(ext_uart_rx)             //接收到的一字节数据
     );
     
-async_transmitter #(.ClkFrequency(50000000),.Baud(9600)) //发送模块，9600无检验位
+async_transmitter #(.ClkFrequency(40000000),.Baud(9600)) //发送模块，9600无检验位
     ext_uart_t(
-        .clk(clk_50M),                  //外部时钟信号
+        .clk(clk_40M),                  //外部时钟信号
         .TxD(txd),                      //串行信号输出
         .TxD_busy(ext_uart_busy),       //发送器忙状态指示
         .TxD_start(ext_uart_start_reg),    //开始发送信号
@@ -190,18 +192,44 @@ async_transmitter #(.ClkFrequency(50000000),.Baud(9600)) //发送模块，9600�
     );
 
 //图像输出演示，分辨率800x600@75Hz，像素时钟为50MHz
-wire [11:0] hdata;
-assign video_red = hdata < 266 ? 3'b111 : 0; //红色竖条
-assign video_green = hdata < 532 && hdata >= 266 ? 3'b111 : 0; //绿色竖条
-assign video_blue = hdata >= 532 ? 2'b11 : 0; //蓝色竖条
-assign video_clk = clk_50M;
+//VGA display pattern generation
+wire[2:0] red,green;
+wire[1:0] blue;
+wire[7:0] video_pixel;
+assign video_red = video_pixel[2:0];
+assign video_green = video_pixel[5:3];
+assign video_blue = video_pixel[7:6];
+// assign video_pixel = {red,green,blue};
+assign video_clk = clk_40M;
+wire[18:0] gaddr_r;
+reg[18:0] gaddr_w;
+reg[7:0] gdata_w;
+
+wire gram_ce;
+reg gram_we;
+assign gram_ce = 1'b1;
+
+gram gram0(
+    .addra(gaddr_w),
+    .clka(clk_80M), 
+    .dina(gdata_w),
+    .ena(gram_ce), 
+    .wea(gram_we), 
+
+    .addrb(gaddr_r), 
+    .clkb(clk_80M), 
+    .doutb(video_pixel), 
+    .enb(gram_ce) 
+);
+
 vga #(12, 800, 856, 976, 1040, 600, 637, 643, 666, 1, 1) vga800x600at75 (
-    .clk(clk_50M), 
-    .hdata(hdata), //横坐标
-    .vdata(),      //纵坐标
+    .clk(clk_80M), 
+    .hdata(red),
+    .vdata({blue,green}),
     .hsync(video_hsync),
     .vsync(video_vsync),
-    .data_enable(video_de)
+    .data_enable(video_de),
+    .addr(gaddr_r)
 );
 
 /* =========== Demo code end =========== */
@@ -220,7 +248,7 @@ always @(posedge ext_uart_ready) begin
     end
 end
 openmips openmips0(
-    .clk(clk_25M), // 25MHz
+    .clk(clk_40M), // 40MHz
     .rst(reset_btn),
 
     .if_addr_o(openmips_if_addr_o),
@@ -270,7 +298,7 @@ wire[31:0] openmips_reg4;
 wire[31:0] openmips_reg19;
 
 rom rom0(
-    .clk(clk_50M),
+    .clk(clk_40M),
     .ce(rom_ce),
     .addr(rom_addr),
     .inst(rom_data)
@@ -302,6 +330,9 @@ always @(*) begin
         ext_uart_start <= 1'b0;
         rom_ce <= 1'b0;
         rom_addr <= 12'b0;
+        gaddr_w <= 19'b0;
+        gdata_w <= 8'b0;
+        gram_we <= 1'b0;
         openmips_if_data_i <= 32'b0;
         openmips_mem_data_i <= 32'b0;
         already_read_status <= serial_read_status;
@@ -326,6 +357,9 @@ always @(*) begin
         ext_uart_start <= 1'b0;
         rom_ce <= 1'b0;
         rom_addr <= 12'b0;
+        gaddr_w <= 19'b0;
+        gdata_w <= 8'b0;
+        gram_we <= 1'b0;
         openmips_if_data_i <= 32'b0;
         openmips_mem_data_i <= 32'b0;
         if (openmips_mem_ce_o) begin
@@ -376,6 +410,9 @@ always @(*) begin
                     end
                 end
             end else if (openmips_mem_vga_ce_o) begin
+                gaddr_w <= openmips_mem_addr_o[18:0];
+                gdata_w <= openmips_mem_data_o[7:0];
+                gram_we <= 1'b1;
             end else if (openmips_mem_rom_ce_o) begin
                 rom_addr <= openmips_mem_addr_o[13:2];
                 rom_ce <= 1'b1;
@@ -421,7 +458,7 @@ always @(*) begin
         end
     end
 end
-always @(posedge clk_50M) begin
+always @(posedge clk_40M) begin
     number <= openmips_reg19[7:0];
     led_bits <= openmips_reg4[7:0];
     if (reset_btn) begin

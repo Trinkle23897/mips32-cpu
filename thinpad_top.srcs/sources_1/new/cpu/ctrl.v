@@ -11,13 +11,17 @@ module ctrl(
     input wire stallreq_from_ex,
     input wire stallreq_from_mem,
 
+    input wire is_load_i,
+
     output reg[`RegBus] new_pc,
     output reg mem_we_o,
+    output reg mem_ce_o,
     output reg flush,
     output reg[5:0] stall
 );
 
     reg pause_for_store;
+    reg pause_for_load;
 
     always @(posedge clk) begin
         if (rst == `RstEnable)
@@ -26,11 +30,18 @@ module ctrl(
             pause_for_store <= ~pause_for_store;
     end
 
+    always @(posedge clk) begin
+        if (rst == `RstEnable)
+            pause_for_load <= 1'b0;
+        else if (is_load_i == 1'b1)
+            pause_for_load <= ~pause_for_load;
+    end
+
     always @ (*) begin
         if (rst == `RstEnable) begin
             stall <= 6'b000000;
             flush <= 1'b0;
-            new_pc <= `ZeroWord;
+            new_pc <= `StartInstAddr;
             mem_we_o <= 1'b0;
         end else if (excepttype_i != `ZeroWord) begin
             flush <= 1'b1;
@@ -65,6 +76,14 @@ module ctrl(
             stall <= 6'b001111;
             flush <= 1'b0;
             mem_we_o <= 1'b1;
+        end else if (is_load_i == 1'b1 && pause_for_load == 1'b0) begin
+            stall <= 6'b001111;
+            flush <= 1'b0;
+            mem_we_o <= 1'b0;
+        end else if (is_load_i == 1'b1 && pause_for_load == 1'b1) begin
+            stall <= 6'b000111;
+            flush <= 1'b0;
+            mem_we_o <= 1'b0;
         end else if (stallreq_from_mem == `Stop) begin
             stall <= 6'b000111;
             flush <= 1'b0;
@@ -72,7 +91,7 @@ module ctrl(
         end else begin
             stall <= 6'b000000; 
             flush <= 1'b0; 
-            new_pc <= `ZeroWord;
+            new_pc <= `StartInstAddr;
             mem_we_o <= 1'b0;
         end
     end
