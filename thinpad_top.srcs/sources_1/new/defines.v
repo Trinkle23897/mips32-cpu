@@ -24,7 +24,7 @@
 `define False_v 1'b0
 `define ChipEnable 1'b1
 `define ChipDisable 1'b0
-`define StartInstAddr 32'h80000000
+`define StartInstAddr 32'hbfc00000
 
 // Instruction Number
 `define EXE_AND 6'b100100

@@ -1,4 +1,5 @@
-`timescale 1ns / 1ps
+`include "../defines.v"
+//`timescale 1ns / 1ps
 //
 // WIDTH: bits in register hdata & vdata
 // HSIZE: horizontal size of visible field 
@@ -18,6 +19,7 @@ module vga
     input wire clk,
     output wire hsync,
     output wire vsync,
+    output reg [18:0] addr,
     output reg [WIDTH - 1:0] hdata,
     output reg [WIDTH - 1:0] vdata,
     output wire data_enable
@@ -27,6 +29,7 @@ module vga
 initial begin
     hdata <= 0;
     vdata <= 0;
+    addr <= 19'b0;
 end
 
 // hdata
@@ -47,6 +50,16 @@ begin
             vdata <= 0;
         else
             vdata <= vdata + 1;
+    end
+end
+
+always @ (posedge clk) begin
+    if (hdata == 0 & vdata == 0) begin
+        addr <= 19'b0; 
+    end else begin
+        if (data_enable) begin
+            addr <= addr + 1;
+        end
     end
 end
 

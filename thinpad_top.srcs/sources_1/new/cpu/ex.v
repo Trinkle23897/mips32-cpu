@@ -66,6 +66,8 @@ module ex(
     output reg                    div_start_o,
     output reg                    signed_div_o,
 
+    output wire                   is_load_o,
+
     output wire[`AluOpBus]        aluop_o,
     output wire[`RegBus]          mem_addr_o,
     output wire[`RegBus]          reg2_o,
@@ -149,6 +151,8 @@ module ex(
                         :  (reg1_i < reg2_i);
     assign reg1_i_not = ~reg1_i;
 
+    assign is_load_o = ((aluop_i == `EXE_LB_OP) ||  (aluop_i == `EXE_LH_OP) || (aluop_i == `EXE_LW_OP));
+    
     always @ (*) begin
         if (rst == `RstEnable)
             arithmeticres <= `ZeroWord;
