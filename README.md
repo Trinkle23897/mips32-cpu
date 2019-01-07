@@ -50,7 +50,7 @@ Basic CPU Implementation
 
 1. topmodule为thinpad_top.v和tb.sv
 2. 改了compile func test的脚本，make ver=sim是没延时的，直接make是有延时的
-3. 在外面接写好了sram的控制逻辑（虽然没有状态机），在内部写好了带TLB的MMU，添加了所有异常的处理
+3. 在外面接写好了sram的控制逻辑，在内部写好了带TLB的MMU，添加了所有异常的处理
 
 ### 测试
 
