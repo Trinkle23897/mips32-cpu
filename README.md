@@ -7,6 +7,7 @@ Thinpad 模板工程
 
 请统一使用utf-8编码
 
+报告位于 https://github.com/Trinkle23897/mips32-cpu/releases/download/v4.VGA/report.pdf
 
 # First Milestone (Fri. Week7)
 
