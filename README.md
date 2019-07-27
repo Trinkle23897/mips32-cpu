@@ -57,7 +57,7 @@ Basic CPU Implementation
 
 1. 编译vivado project，点击Generate bitstream，我本机五分钟之内能跑出来
 2. 本地连接192.168.8.8，远程调试连接`http://os.cs.tsinghua.edu.cn/thinpad/`
-3. 以本地为例，先传func test生成的bin，然后再把bit传上去（路径位于`thinpad_top.runs/impl_1/thinpad_top.bit`），印象中bit放置在BASERAM offset=0位置处
+3. 以本地为例，先传func test生成的bin，然后再把bit传上去（路径位于`thinpad_top.runs/impl_1/thinpad_top.bit`），印象中bin放置在BASERAM offset=0位置处
 4. 然后它就会自动跑，看到`0x5d`说明成功
 
 # Third Milestone
