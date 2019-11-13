@@ -400,7 +400,7 @@ module id(
                     end
                 end
                 `EXE_BNE: begin
-                    wreg_o <= `WriteDisable; aluop_o <= `EXE_BLEZ_OP; alusel_o <= `EXE_RES_JUMP_BRANCH;
+                    wreg_o <= `WriteDisable; aluop_o <= `EXE_BNE_OP; alusel_o <= `EXE_RES_JUMP_BRANCH;
                     reg1_read_o <= 1'b1; reg2_read_o <= 1'b1; instvalid <= `InstValid;
                     next_inst_in_delayslot_o <= `InDelaySlot;
                     if (reg1_o != reg2_o) begin
